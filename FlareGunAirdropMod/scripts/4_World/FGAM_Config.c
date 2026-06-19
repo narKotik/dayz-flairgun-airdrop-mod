@@ -87,7 +87,9 @@ class FGAM_Config
             Flare.redZoneDuration        = root.flare.redZoneDuration;
         }
 
-        string[] colors = {"RED","GREEN","BLUE","WHITE","YELLOW","BLACK","ORANGE"};
+        TStringArray colors = new TStringArray();
+        colors.Insert("RED"); colors.Insert("GREEN"); colors.Insert("BLUE");
+        colors.Insert("WHITE"); colors.Insert("YELLOW"); colors.Insert("BLACK"); colors.Insert("ORANGE");
         foreach (string color : colors)
         {
             TStringArray items = new TStringArray();
@@ -149,20 +151,25 @@ class FGAM_Config
                                 "BarbedWire","SparkPlug","CarBattery"};
         LootTables.Set("ORANGE", orange);
 
-        string[] hColors  = {"RED","GREEN","BLUE","WHITE","YELLOW","BLACK","ORANGE"};
-        int[]    hWeights = {20,   15,     15,    15,     10,      15,     10};
-        for (int i = 0; i < hColors.Count(); i++)
-            Flare.helicrashFlareWeights.Set(hColors[i], hWeights[i]);
+        Flare.helicrashFlareWeights.Set("RED", 20);
+        Flare.helicrashFlareWeights.Set("GREEN", 15);
+        Flare.helicrashFlareWeights.Set("BLUE", 15);
+        Flare.helicrashFlareWeights.Set("WHITE", 15);
+        Flare.helicrashFlareWeights.Set("YELLOW", 10);
+        Flare.helicrashFlareWeights.Set("BLACK", 15);
+        Flare.helicrashFlareWeights.Set("ORANGE", 10);
 
-        string[] tColors  = {"RED","GREEN","BLUE","WHITE","BLACK","ORANGE"};
-        int[]    tWeights = {25,   20,     15,    20,     10,     10};
-        for (int j = 0; j < tColors.Count(); j++)
-            Flare.trainFlareWeights.Set(tColors[j], tWeights[j]);
+        Flare.trainFlareWeights.Set("RED", 25);
+        Flare.trainFlareWeights.Set("GREEN", 20);
+        Flare.trainFlareWeights.Set("BLUE", 15);
+        Flare.trainFlareWeights.Set("WHITE", 20);
+        Flare.trainFlareWeights.Set("BLACK", 10);
+        Flare.trainFlareWeights.Set("ORANGE", 10);
 
-        string[] bColors  = {"GREEN","BLUE","WHITE","ORANGE"};
-        int[]    bWeights = {40,     25,    25,     10};
-        for (int k = 0; k < bColors.Count(); k++)
-            Flare.beachFlareWeights.Set(bColors[k], bWeights[k]);
+        Flare.beachFlareWeights.Set("GREEN", 40);
+        Flare.beachFlareWeights.Set("BLUE", 25);
+        Flare.beachFlareWeights.Set("WHITE", 25);
+        Flare.beachFlareWeights.Set("ORANGE", 10);
     }
 }
 

@@ -1,0 +1,31 @@
+# ── Build output ──────────────────────────────────────────────────────────────
+addons/*.pbo
+addons/*.bisign
+keys/*.biprivatekey
+
+# ── Server deploy artifacts (live server files, not source) ───────────────────
+# These are deployed by 2_deploy.bat — don't track the deployed copies
+/deploy/
+
+# ── Secrets / credentials ─────────────────────────────────────────────────────
+serverDZ.cfg
+*.cfg
+BEServer*.cfg
+
+# ── DayZ Tools intermediate files ────────────────────────────────────────────
+*.bak
+*.log
+P:\
+
+# ── Claude Code internal files ────────────────────────────────────────────────
+.claude/
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── Editor ───────────────────────────────────────────────────────────────────
+.vscode/
+*.suo
+*.user

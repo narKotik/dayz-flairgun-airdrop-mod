@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    FGAM cfgeconomycore.xml
+    Place this file in your server's mpmissions/<mission>/db/ folder,
+    or merge its contents into the existing cfgeconomycore.xml.
+
+    This tells CE to also load FGAM's types.xml so vanilla types.xml
+    stays untouched.
+-->
+<economycore>
+    <classes>
+        <rootclass name="FlareGun">
+            <subclass name="FGAM_Mag_Red"/>
+            <subclass name="FGAM_Mag_Green"/>
+            <subclass name="FGAM_Mag_Blue"/>
+            <subclass name="FGAM_Mag_White"/>
+            <subclass name="FGAM_Mag_Yellow"/>
+            <subclass name="FGAM_Mag_Black"/>
+            <subclass name="FGAM_Mag_Orange"/>
+        </rootclass>
+    </classes>
+    <ce folder="db">
+        <file name="FGAM_types.xml" type="types"/>
+    </ce>
+</economycore>

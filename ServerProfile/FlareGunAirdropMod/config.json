@@ -1,0 +1,159 @@
+{
+    "_comment": "FlareGunAirdropMod — server configuration. Copy to your server profile folder.",
+
+    "flare": {
+        "_comment_shotsPerState": "Shots before the gun drops one health tier (1-3 recommended)",
+        "shotsPerState": 1,
+
+        "_comment_minTriggerAltitude": "Minimum height above terrain (metres) the flare must reach to trigger event",
+        "minTriggerAltitude": 50.0,
+
+        "_comment_maxTriggerRadius": "Max horizontal distance (metres) from shooter to count as a valid signal",
+        "maxTriggerRadius": 1500.0,
+
+        "_comment_airdropSpawnHeight": "How many metres above impact the crate spawns before falling",
+        "airdropSpawnHeight": 100.0,
+
+        "_comment_airdropContainerClass": "DayZ class name of the container used for airdrops",
+        "airdropContainerClass": "SeaChest",
+
+        "_comment_red_zone": "Red flare — toxic zone settings",
+        "redZoneDelay": 300.0,
+        "redZoneRadius": 50.0,
+        "redZoneDuration": 1500.0
+    },
+
+    "loot_RED": {
+        "_comment": "Items spawned inside crate for RED flare. Use exact DayZ class names.",
+        "items": [
+            "AKM", "AKM",
+            "Mag_AKM_30Rnd", "Mag_AKM_30Rnd", "Mag_AKM_30Rnd",
+            "HighCapacityVest",
+            "BattleHelmet",
+            "MilitaryBoots_Black",
+            "AssaultBag_Black",
+            "Chemlight_Red", "Chemlight_Red"
+        ]
+    },
+
+    "loot_GREEN": {
+        "_comment": "Survival kit",
+        "items": [
+            "KnifeHunting",
+            "Hatchet",
+            "Matchbox",
+            "TentDome",
+            "Bandage", "Bandage", "Bandage",
+            "Splint",
+            "Epinephrine",
+            "WoodenStick", "WoodenStick",
+            "HunterJacket_Brown",
+            "HunterPants_Brown"
+        ]
+    },
+
+    "loot_BLUE": {
+        "_comment": "Medical humanitarian drop",
+        "items": [
+            "BloodBagKit_0Pos",
+            "BloodBagKit_ABPos",
+            "BloodBagKit_BPos",
+            "Epinephrine", "Epinephrine",
+            "SurgicalKit",
+            "Tetracycline", "Tetracycline",
+            "Morphine",
+            "Saline_500", "Saline_500",
+            "Bandage", "Bandage", "Bandage", "Bandage",
+            "CharcoalTablets",
+            "Disinfectant_Spray"
+        ]
+    },
+
+    "loot_WHITE": {
+        "_comment": "Provisions / food drop",
+        "items": [
+            "ArmyRation", "ArmyRation",
+            "Can_SardinesOpened", "Can_SardinesOpened",
+            "Can_TunafishOpened", "Can_TunafishOpened",
+            "Canteen", "Canteen",
+            "WaterPurificationTablets", "WaterPurificationTablets",
+            "Disinfectant_Spray",
+            "Vitamins",
+            "SodaCan_Cola"
+        ]
+    },
+
+    "loot_YELLOW": {
+        "_comment": "CBRN / NBC protection kit",
+        "items": [
+            "NBC_Suit",
+            "NBC_Hood",
+            "GasMask",
+            "GasMaskFilter", "GasMaskFilter", "GasMaskFilter",
+            "Antidote", "Antidote",
+            "Epinephrine",
+            "Iodine",
+            "NBC_Boots",
+            "NBC_Gloves"
+        ]
+    },
+
+    "loot_BLACK": {
+        "_comment": "Top-tier weapon cache. Black smoke only — no light.",
+        "items": [
+            "M4A1",
+            "Mag_STANAG_30Rnd", "Mag_STANAG_30Rnd", "Mag_STANAG_30Rnd",
+            "PistolSuppressor",
+            "RifleButtstockM4",
+            "RailgunGrip",
+            "ACOG4xScopeOptic",
+            "Glock19",
+            "Mag_Glock_15Rnd", "Mag_Glock_15Rnd",
+            "BulletproofVest_Press",
+            "TacticalHelmet_Black"
+        ]
+    },
+
+    "loot_ORANGE": {
+        "_comment": "Construction tools and rare vehicle parts",
+        "items": [
+            "Hammer",
+            "Screwdriver",
+            "Pliers",
+            "Nails", "Nails", "Nails",
+            "BarbedWire", "BarbedWire",
+            "SparkPlug",
+            "CarBattery",
+            "GlowPlug",
+            "RadiatorBlock",
+            "EngineBelt"
+        ]
+    },
+
+    "spawnWeights": {
+        "_comment": "Weighted probabilities for flare color when gun spawns at each location type. Sum can be any value — ratios matter.",
+        "helicrash": {
+            "RED":    20,
+            "GREEN":  15,
+            "BLUE":   15,
+            "WHITE":  15,
+            "YELLOW": 10,
+            "BLACK":  15,
+            "ORANGE": 10
+        },
+        "train": {
+            "RED":    25,
+            "GREEN":  20,
+            "BLUE":   15,
+            "WHITE":  20,
+            "BLACK":  10,
+            "ORANGE": 10
+        },
+        "beach": {
+            "GREEN":  40,
+            "BLUE":   25,
+            "WHITE":  25,
+            "ORANGE": 10
+        }
+    }
+}

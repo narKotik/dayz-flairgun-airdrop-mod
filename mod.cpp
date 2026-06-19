@@ -1,0 +1,10 @@
+name = "Flare Gun Airdrop Mod";
+picture = "FlareGunAirdropMod\mod_icon.paa";
+logoSmall = "FlareGunAirdropMod\mod_icon.paa";
+logo = "FlareGunAirdropMod\mod_icon.paa";
+logoOver = "FlareGunAirdropMod\mod_icon.paa";
+tooltip = "Transforms the Flare Gun into a strategic airdrop and event trigger.";
+tooltipOwned = "Flare Gun Airdrop Mod — active";
+overview = "Fire colored flares into the sky to trigger unique airdrops and zone events. Each color = different supply crate or hazard.";
+action = "";
+author = "";

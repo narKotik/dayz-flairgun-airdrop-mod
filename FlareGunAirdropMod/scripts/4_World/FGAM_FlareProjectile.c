@@ -1,9 +1,5 @@
 // FGAM_FlareProjectile - tracks flare arc via a per-tick timer
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareProjectile.c
-//
-// FlareSimulation is an engine type string, not a script class.
-// FGAM_FlareTracker is started from FlareGun.OnFire() and polls
-// the nearest flare entity position until it stops moving.
 
 class FGAM_FlareTracker
 {
@@ -29,14 +25,14 @@ class FGAM_FlareTracker
         m_Done       = false;
         m_TimeAlive  = 0;
 
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", (int)(TICK_INTERVAL * 1000), false);
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Tick, (int)(TICK_INTERVAL * 1000), false);
     }
 
     void Tick()
     {
         if (m_Done) return;
 
-        m_TimeAlive += TICK_INTERVAL;
+        m_TimeAlive = m_TimeAlive + TICK_INTERVAL;
         if (m_TimeAlive >= MAX_LIFETIME)
         {
             Print("[FGAM] FlareTracker timeout - firing event at peak");
@@ -67,7 +63,7 @@ class FGAM_FlareTracker
 
         if (!bestFlare)
         {
-            m_TicksStill++;
+            m_TicksStill = m_TicksStill + 1;
         }
         else
         {
@@ -83,7 +79,7 @@ class FGAM_FlareTracker
             m_LastPos   = pos;
 
             if (moved < 0.5)
-                m_TicksStill++;
+                m_TicksStill = m_TicksStill + 1;
             else
                 m_TicksStill = 0;
         }
@@ -95,7 +91,7 @@ class FGAM_FlareTracker
             return;
         }
 
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", (int)(TICK_INTERVAL * 1000), false);
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Tick, (int)(TICK_INTERVAL * 1000), false);
     }
 
     private void FireEvent()

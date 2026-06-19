@@ -9,7 +9,7 @@ enum FGAM_SpawnContext
     BEACH     = 3,
 }
 
-string FGAM_PickWeightedColor(TStringIntMap weights)
+string FGAM_PickWeightedColor(map<string, int> weights)
 {
     int total = 0;
     foreach (string color, int w : weights)
@@ -56,18 +56,14 @@ FGAM_SpawnContext FGAM_DetectSpawnContext(vector pos)
     }
 
     string surfaceType;
-    GetGame().SurfaceGetType3D(pos[0], pos[1] + 0.5, pos[2], surfaceType);
+    GetGame().SurfaceGetType(pos[0], pos[2], surfaceType);
     surfaceType.ToLower();
     if (surfaceType.Contains("rail") || surfaceType.Contains("train"))
         return FGAM_SpawnContext.TRAIN;
 
-    float waterDist = GetGame().GetWaterDepth(pos);
-    if (waterDist >= 0 && waterDist < 40)
-    {
-        float terrH = GetGame().SurfaceY(pos[0], pos[2]);
-        if (terrH < 5.0)
-            return FGAM_SpawnContext.BEACH;
-    }
+    float terrH = GetGame().SurfaceY(pos[0], pos[2]);
+    if (terrH < 2.0)
+        return FGAM_SpawnContext.BEACH;
 
     return FGAM_SpawnContext.NONE;
 }

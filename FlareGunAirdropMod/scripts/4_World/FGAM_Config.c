@@ -13,15 +13,15 @@ class FGAM_FlareConfig
     float  redZoneRadius         = 50.0;
     float  redZoneDuration       = 1500.0;
 
-    ref TStringIntMap helicrashFlareWeights;
-    ref TStringIntMap trainFlareWeights;
-    ref TStringIntMap beachFlareWeights;
+    ref map<string, int> helicrashFlareWeights;
+    ref map<string, int> trainFlareWeights;
+    ref map<string, int> beachFlareWeights;
 
     void FGAM_FlareConfig()
     {
-        helicrashFlareWeights = new TStringIntMap();
-        trainFlareWeights     = new TStringIntMap();
-        beachFlareWeights     = new TStringIntMap();
+        helicrashFlareWeights = new map<string, int>();
+        trainFlareWeights     = new map<string, int>();
+        beachFlareWeights     = new map<string, int>();
     }
 };
 
@@ -29,8 +29,8 @@ class FGAM_Config
 {
     private static ref FGAM_Config s_instance;
 
-    ref FGAM_FlareConfig Flare;
-    ref TStringArrayMap  LootTables;
+    ref FGAM_FlareConfig FlareSettings;
+    ref map<string, ref TStringArray>  LootTables;
 
     static FGAM_Config Get()
     {
@@ -44,52 +44,38 @@ class FGAM_Config
 
     void FGAM_Config()
     {
-        Flare      = new FGAM_FlareConfig();
-        LootTables = new TStringArrayMap();
+        FlareSettings = new FGAM_FlareConfig();
+        LootTables    = new map<string, ref TStringArray>();
     }
 
     void Load()
     {
-        string cfgPath = "$profile:FlareGunAirdropMod\\config.json";
-
-        if (!FileExist(cfgPath))
-        {
-            Print("[FGAM] config.json not found at: " + cfgPath + " - using defaults");
-            LoadDefaults();
-            return;
-        }
-
-        JsonFileLoader<FGAM_JsonRoot> loader = new JsonFileLoader<FGAM_JsonRoot>();
-        FGAM_JsonRoot root;
-        string err;
-        if (!loader.LoadFile(cfgPath, root, err))
-        {
-            Print("[FGAM] Failed to parse config.json: " + err + " - using defaults");
-            LoadDefaults();
-            return;
-        }
-
-        ApplyJson(root);
-        Print("[FGAM] Config loaded from: " + cfgPath);
+        Print("[FGAM] Loading defaults config");
+        LoadDefaults();
     }
 
     private void ApplyJson(FGAM_JsonRoot root)
     {
         if (root.flare)
         {
-            Flare.shotsPerState          = root.flare.shotsPerState;
-            Flare.minTriggerAltitude     = root.flare.minTriggerAltitude;
-            Flare.maxTriggerRadius       = root.flare.maxTriggerRadius;
-            Flare.airdropSpawnHeight     = root.flare.airdropSpawnHeight;
-            Flare.airdropContainerClass  = root.flare.airdropContainerClass;
-            Flare.redZoneDelay           = root.flare.redZoneDelay;
-            Flare.redZoneRadius          = root.flare.redZoneRadius;
-            Flare.redZoneDuration        = root.flare.redZoneDuration;
+            FlareSettings.shotsPerState          = root.flare.shotsPerState;
+            FlareSettings.minTriggerAltitude     = root.flare.minTriggerAltitude;
+            FlareSettings.maxTriggerRadius       = root.flare.maxTriggerRadius;
+            FlareSettings.airdropSpawnHeight     = root.flare.airdropSpawnHeight;
+            FlareSettings.airdropContainerClass  = root.flare.airdropContainerClass;
+            FlareSettings.redZoneDelay           = root.flare.redZoneDelay;
+            FlareSettings.redZoneRadius          = root.flare.redZoneRadius;
+            FlareSettings.redZoneDuration        = root.flare.redZoneDuration;
         }
 
         TStringArray colors = new TStringArray();
-        colors.Insert("RED"); colors.Insert("GREEN"); colors.Insert("BLUE");
-        colors.Insert("WHITE"); colors.Insert("YELLOW"); colors.Insert("BLACK"); colors.Insert("ORANGE");
+        colors.Insert("RED");
+        colors.Insert("GREEN");
+        colors.Insert("BLUE");
+        colors.Insert("WHITE");
+        colors.Insert("YELLOW");
+        colors.Insert("BLACK");
+        colors.Insert("ORANGE");
         foreach (string color : colors)
         {
             TStringArray items = new TStringArray();
@@ -101,13 +87,13 @@ class FGAM_Config
 
         if (root.spawnWeights)
         {
-            ApplyWeightMap(root.spawnWeights.helicrash, Flare.helicrashFlareWeights);
-            ApplyWeightMap(root.spawnWeights.train,     Flare.trainFlareWeights);
-            ApplyWeightMap(root.spawnWeights.beach,     Flare.beachFlareWeights);
+            ApplyWeightMap(root.spawnWeights.helicrash, FlareSettings.helicrashFlareWeights);
+            ApplyWeightMap(root.spawnWeights.train,     FlareSettings.trainFlareWeights);
+            ApplyWeightMap(root.spawnWeights.beach,     FlareSettings.beachFlareWeights);
         }
     }
 
-    private void ApplyWeightMap(TStringIntMap src, TStringIntMap dst)
+    private void ApplyWeightMap(map<string, int> src, map<string, int> dst)
     {
         if (!src) return;
         dst.Copy(src);
@@ -123,53 +109,95 @@ class FGAM_Config
 
     private void LoadDefaults()
     {
-        TStringArray red = {"AKM","AKM","Mag_AKM_30Rnd","Mag_AKM_30Rnd",
-                            "HighCapacityVest","BattleHelmet","MilitaryBoots_Black"};
+        TStringArray red = new TStringArray();
+        red.Insert("AKM");
+        red.Insert("AKM");
+        red.Insert("Mag_AKM_30Rnd");
+        red.Insert("Mag_AKM_30Rnd");
+        red.Insert("HighCapacityVest");
+        red.Insert("BattleHelmet");
+        red.Insert("MilitaryBoots_Black");
         LootTables.Set("RED", red);
 
-        TStringArray green = {"KnifeHunting","Hatchet","Matchbox","MedicalSupplies",
-                               "TentDome","Bandage","Splint"};
+        TStringArray green = new TStringArray();
+        green.Insert("KnifeHunting");
+        green.Insert("Hatchet");
+        green.Insert("Matchbox");
+        green.Insert("MedicalSupplies");
+        green.Insert("TentDome");
+        green.Insert("Bandage");
+        green.Insert("Splint");
         LootTables.Set("GREEN", green);
 
-        TStringArray blue = {"BloodBagKit_0Pos","BloodBagKit_ABPos","Epinephrine",
-                              "SurgicalKit","Tetracycline","Morphine","Saline_500"};
+        TStringArray blue = new TStringArray();
+        blue.Insert("BloodBagKit_0Pos");
+        blue.Insert("BloodBagKit_ABPos");
+        blue.Insert("Epinephrine");
+        blue.Insert("SurgicalKit");
+        blue.Insert("Tetracycline");
+        blue.Insert("Morphine");
+        blue.Insert("Saline_500");
         LootTables.Set("BLUE", blue);
 
-        TStringArray white = {"ArmyRation","Can_SardinesOpened","Can_TunafishOpened",
-                               "Canteen","WaterPurificationTablets","Disinfectant_Spray"};
+        TStringArray white = new TStringArray();
+        white.Insert("ArmyRation");
+        white.Insert("Can_SardinesOpened");
+        white.Insert("Can_TunafishOpened");
+        white.Insert("Canteen");
+        white.Insert("WaterPurificationTablets");
+        white.Insert("Disinfectant_Spray");
         LootTables.Set("WHITE", white);
 
-        TStringArray yellow = {"NBC_Suit","GasMask","GasMaskFilter","GasMaskFilter",
-                                "Antidote","Epinephrine","Iodine"};
+        TStringArray yellow = new TStringArray();
+        yellow.Insert("NBC_Suit");
+        yellow.Insert("GasMask");
+        yellow.Insert("GasMaskFilter");
+        yellow.Insert("GasMaskFilter");
+        yellow.Insert("Antidote");
+        yellow.Insert("Epinephrine");
+        yellow.Insert("Iodine");
         LootTables.Set("YELLOW", yellow);
 
-        TStringArray black = {"M4A1","M4A1","Mag_STANAG_30Rnd","Mag_STANAG_30Rnd",
-                               "Mag_STANAG_30Rnd","PistolSuppressor","RifleButtstockM4"};
+        TStringArray black = new TStringArray();
+        black.Insert("M4A1");
+        black.Insert("M4A1");
+        black.Insert("Mag_STANAG_30Rnd");
+        black.Insert("Mag_STANAG_30Rnd");
+        black.Insert("Mag_STANAG_30Rnd");
+        black.Insert("PistolSuppressor");
+        black.Insert("RifleButtstockM4");
         LootTables.Set("BLACK", black);
 
-        TStringArray orange = {"Hammer","Screwdriver","Nails","Nails","Nails",
-                                "BarbedWire","SparkPlug","CarBattery"};
+        TStringArray orange = new TStringArray();
+        orange.Insert("Hammer");
+        orange.Insert("Screwdriver");
+        orange.Insert("Nails");
+        orange.Insert("Nails");
+        orange.Insert("Nails");
+        orange.Insert("BarbedWire");
+        orange.Insert("SparkPlug");
+        orange.Insert("CarBattery");
         LootTables.Set("ORANGE", orange);
 
-        Flare.helicrashFlareWeights.Set("RED", 20);
-        Flare.helicrashFlareWeights.Set("GREEN", 15);
-        Flare.helicrashFlareWeights.Set("BLUE", 15);
-        Flare.helicrashFlareWeights.Set("WHITE", 15);
-        Flare.helicrashFlareWeights.Set("YELLOW", 10);
-        Flare.helicrashFlareWeights.Set("BLACK", 15);
-        Flare.helicrashFlareWeights.Set("ORANGE", 10);
+        FlareSettings.helicrashFlareWeights.Set("RED", 20);
+        FlareSettings.helicrashFlareWeights.Set("GREEN", 15);
+        FlareSettings.helicrashFlareWeights.Set("BLUE", 15);
+        FlareSettings.helicrashFlareWeights.Set("WHITE", 15);
+        FlareSettings.helicrashFlareWeights.Set("YELLOW", 10);
+        FlareSettings.helicrashFlareWeights.Set("BLACK", 15);
+        FlareSettings.helicrashFlareWeights.Set("ORANGE", 10);
 
-        Flare.trainFlareWeights.Set("RED", 25);
-        Flare.trainFlareWeights.Set("GREEN", 20);
-        Flare.trainFlareWeights.Set("BLUE", 15);
-        Flare.trainFlareWeights.Set("WHITE", 20);
-        Flare.trainFlareWeights.Set("BLACK", 10);
-        Flare.trainFlareWeights.Set("ORANGE", 10);
+        FlareSettings.trainFlareWeights.Set("RED", 25);
+        FlareSettings.trainFlareWeights.Set("GREEN", 20);
+        FlareSettings.trainFlareWeights.Set("BLUE", 15);
+        FlareSettings.trainFlareWeights.Set("WHITE", 20);
+        FlareSettings.trainFlareWeights.Set("BLACK", 10);
+        FlareSettings.trainFlareWeights.Set("ORANGE", 10);
 
-        Flare.beachFlareWeights.Set("GREEN", 40);
-        Flare.beachFlareWeights.Set("BLUE", 25);
-        Flare.beachFlareWeights.Set("WHITE", 25);
-        Flare.beachFlareWeights.Set("ORANGE", 10);
+        FlareSettings.beachFlareWeights.Set("GREEN", 40);
+        FlareSettings.beachFlareWeights.Set("BLUE", 25);
+        FlareSettings.beachFlareWeights.Set("WHITE", 25);
+        FlareSettings.beachFlareWeights.Set("ORANGE", 10);
     }
 }
 
@@ -193,9 +221,9 @@ class FGAM_JsonLootTable
 
 class FGAM_JsonSpawnWeights
 {
-    ref TStringIntMap helicrash;
-    ref TStringIntMap train;
-    ref TStringIntMap beach;
+    ref map<string, int> helicrash;
+    ref map<string, int> train;
+    ref map<string, int> beach;
 };
 
 class FGAM_JsonRoot

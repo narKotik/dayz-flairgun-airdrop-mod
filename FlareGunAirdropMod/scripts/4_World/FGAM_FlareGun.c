@@ -1,9 +1,7 @@
-// FGAM_FlareGun - script class for vanilla FlareGun (config-only in vanilla,
-// no existing script class). Defining it here without 'modded' creates the
-// script association. Inherits Pistol_Base like all DayZ pistol-type weapons.
+// FGAM_FlareGun - modded FlareGun: block repair, degrade on shot, spawn tracker
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
 
-class FlareGun : Pistol_Base
+modded class FlareGun
 {
     private int m_FGAM_ShotsInState = 0;
 

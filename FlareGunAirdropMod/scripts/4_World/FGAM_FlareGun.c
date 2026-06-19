@@ -69,12 +69,6 @@ modded class Weapon_Base
             Print("[FGAM] FlareGun spawned with " + color + " magazine (ctx=" + ctx + ")");
     }
 
-    override bool CanBeRepaired(EntityAI item, float healthLevel, int damage)
-    {
-        if (GetType() == "FlareGun") return false;
-        return super.CanBeRepaired(item, healthLevel, damage);
-    }
-
     private string FGAM_GetCurrentColor()
     {
         Magazine mag = GetMagazine(GetCurrentMuzzle());
@@ -114,20 +108,4 @@ modded class Weapon_Base
         Print("[FGAM] FlareGun degraded to condition: " + GetItemCondition());
     }
 
-    override void OnStoreSave(ParamsWriteContext ctx)
-    {
-        super.OnStoreSave(ctx);
-        if (GetType() == "FlareGun")
-            ctx.Write(m_FGAM_ShotsInState);
-    }
-
-    override bool OnStoreLoad(ParamsReadContext ctx, int version)
-    {
-        if (!super.OnStoreLoad(ctx, version)) return false;
-        if (GetType() == "FlareGun")
-        {
-            if (!ctx.Read(m_FGAM_ShotsInState)) return false;
-        }
-        return true;
-    }
 }

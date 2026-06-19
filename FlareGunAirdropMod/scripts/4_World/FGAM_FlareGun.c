@@ -1,4 +1,4 @@
-// FGAM_FlareGun - hooks into Weapon_Base (FlareGun has no vanilla script class)
+// FGAM_FlareGun
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
 
 modded class Weapon_Base
@@ -7,44 +7,51 @@ modded class Weapon_Base
 
     override void OnFire(int muzzle_index)
     {
+        string chamberName = "";
+        if (GetGame().IsServer() && GetType() == "Flaregun")
+        {
+            chamberName = GetChamberAmmoTypeName(GetCurrentMuzzle());
+            Print("[FGAM] PRE-SUPER GetChamberAmmoTypeName='" + chamberName + "'");
+        }
+
         super.OnFire(muzzle_index);
 
         if (!GetGame().IsServer()) return;
-        if (GetType() != "FlareGun") return;
+        if (GetType() != "Flaregun") return;
 
-        string color = FGAM_GetCurrentColor();
+        // ColorTracker is set by EEItemLocationChanged when a mag leaves cargo (oldType=3)
+        string trackerColor = FGAM_ColorTracker.Consume();
+        Print("[FGAM] POST-SUPER chamberName='" + chamberName + "' trackerColor='" + trackerColor + "'");
+
+        string color = trackerColor;
+        if (color == "")
+        {
+            // Fallback: derive color from chamberName (works for RED, may be wrong for others)
+            chamberName.ToLower();
+            if      (chamberName.Contains("_orange")) color = "ORANGE";
+            else if (chamberName.Contains("_red"))    color = "RED";
+            else if (chamberName.Contains("_green"))  color = "GREEN";
+            else if (chamberName.Contains("_black"))  color = "BLACK";
+            else if (chamberName.Contains("_blue"))   color = "BLUE";
+            else if (chamberName.Contains("_yellow")) color = "YELLOW";
+            else if (chamberName.Contains("_white"))  color = "WHITE";
+        }
+
+        Print("[FGAM] OnFire final color='" + color + "'");
+
         if (color != "")
         {
             FGAM_FlareTracker tracker = new FGAM_FlareTracker(color, GetPosition());
-            Print("[FGAM] FlareTracker started for color: " + color);
         }
 
         m_FGAM_ShotsInState = m_FGAM_ShotsInState + 1;
-
         int shotsNeeded = FGAM_Config.Get().FlareSettings.shotsPerState;
         if (shotsNeeded < 1) shotsNeeded = 1;
-
         if (m_FGAM_ShotsInState >= shotsNeeded)
         {
             m_FGAM_ShotsInState = 0;
             FGAM_DegradeCondition();
         }
-    }
-
-    private string FGAM_GetCurrentColor()
-    {
-        Magazine mag = GetMagazine(GetCurrentMuzzle());
-        if (!mag) return "";
-        string cls = mag.GetType();
-        cls.ToLower();
-        if (cls.Contains("_red"))    return "RED";
-        if (cls.Contains("_green"))  return "GREEN";
-        if (cls.Contains("_blue"))   return "BLUE";
-        if (cls.Contains("_white"))  return "WHITE";
-        if (cls.Contains("_yellow")) return "YELLOW";
-        if (cls.Contains("_black"))  return "BLACK";
-        if (cls.Contains("_orange")) return "ORANGE";
-        return "";
     }
 
     private void FGAM_DegradeCondition()
@@ -56,7 +63,6 @@ modded class Weapon_Base
         else if (h > 0.25)  next = 0.25;
         else if (h > 0.0)   next = 0.0;
         else                return;
-
         SetHealth("", "Health", GetMaxHealth("", "") * next);
         Print("[FGAM] FlareGun degraded, health now " + (next * 100) + "%");
     }

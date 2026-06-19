@@ -51,8 +51,9 @@ class FGAM_AirdropManager
 
     private void SpawnAirdropCrate(vector pos, string color, FGAM_Config cfg)
     {
+        float groundY = GetGame().SurfaceY(pos[0], pos[2]);
         vector spawnPos = pos;
-        spawnPos[1] = pos[1] + cfg.FlareSettings.airdropSpawnHeight;
+        spawnPos[1] = groundY + 0.5;
 
         Object obj = GetGame().CreateObjectEx(cfg.FlareSettings.airdropContainerClass, spawnPos, ECE_CREATEPHYSICS);
 
@@ -62,7 +63,6 @@ class FGAM_AirdropManager
             return;
         }
 
-        obj.SetPosition(spawnPos);
         obj.PlaceOnSurface();
 
         ItemBase crate = ItemBase.Cast(obj);
@@ -98,6 +98,7 @@ class FGAM_AirdropManager
         timer.m_SpawnHeight    = cfg.FlareSettings.airdropSpawnHeight;
         timer.m_ContainerClass = cfg.FlareSettings.airdropContainerClass;
         timer.m_LootColor      = "RED";
+        timer.KeepAlive();
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(timer.Activate, (int)(cfg.FlareSettings.redZoneDelay * 1000), false);
         Print("[FGAM] Toxic zone + loot scheduled in " + cfg.FlareSettings.redZoneDelay + "s at " + pos);
     }
@@ -105,6 +106,9 @@ class FGAM_AirdropManager
 
 class FGAM_ToxicZoneTimer
 {
+    // Static ref prevents GC before Activate() fires (same pattern as FGAM_FlareTracker)
+    private static ref array<ref FGAM_ToxicZoneTimer> s_Active = new array<ref FGAM_ToxicZoneTimer>();
+
     vector m_Position;
     float  m_Radius;
     float  m_Duration;
@@ -112,11 +116,22 @@ class FGAM_ToxicZoneTimer
     string m_ContainerClass;
     string m_LootColor;
 
+    void KeepAlive()
+    {
+        s_Active.Insert(this);
+    }
+
     void Activate()
     {
+        s_Active.RemoveItem(this);
+
         if (!GetGame().IsServer()) return;
 
-        Object zoneObj = GetGame().CreateObjectEx("ContaminatedArea_Dynamic", m_Position, ECE_CREATEPHYSICS);
+        float groundY = GetGame().SurfaceY(m_Position[0], m_Position[2]);
+        vector groundPos = m_Position;
+        groundPos[1] = groundY;
+
+        Object zoneObj = GetGame().CreateObjectEx("ContaminatedArea_Dynamic", groundPos, ECE_CREATEPHYSICS);
 
         if (!zoneObj)
         {
@@ -124,10 +139,10 @@ class FGAM_ToxicZoneTimer
             return;
         }
 
-        zoneObj.SetPosition(m_Position);
+        zoneObj.SetPosition(groundPos);
 
-        vector spawnPos = m_Position;
-        spawnPos[1] = m_Position[1] + m_SpawnHeight;
+        vector spawnPos = groundPos;
+        spawnPos[1] = groundY + 0.5;
         Object crateObj = GetGame().CreateObjectEx(m_ContainerClass, spawnPos, ECE_CREATEPHYSICS);
 
         ItemBase crate;
@@ -150,12 +165,15 @@ class FGAM_ToxicZoneTimer
                     }
                 }
             }
+            if (ItemBase.Cast(crateObj))
+                ItemBase.Cast(crateObj).PlaceOnSurface();
             Print("[FGAM] Red loot crate spawned inside zone at " + spawnPos);
         }
 
         FGAM_ToxicZoneRemover remover = new FGAM_ToxicZoneRemover();
         remover.m_Zone  = zoneObj;
         remover.m_Crate = crate;
+        remover.KeepAlive();
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(remover.Remove, (int)(m_Duration * 1000), false);
 
         Print("[FGAM] Toxic zone activated at " + m_Position + " - lasts " + m_Duration + "s");
@@ -164,11 +182,21 @@ class FGAM_ToxicZoneTimer
 
 class FGAM_ToxicZoneRemover
 {
+    // Static ref prevents GC before Remove() fires
+    private static ref array<ref FGAM_ToxicZoneRemover> s_Active = new array<ref FGAM_ToxicZoneRemover>();
+
     Object   m_Zone;
     ItemBase m_Crate;
 
+    void KeepAlive()
+    {
+        s_Active.Insert(this);
+    }
+
     void Remove()
     {
+        s_Active.RemoveItem(this);
+
         if (m_Zone)
         {
             GetGame().ObjectDelete(m_Zone);

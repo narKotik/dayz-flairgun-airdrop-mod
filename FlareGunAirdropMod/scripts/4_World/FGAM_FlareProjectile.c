@@ -1,102 +1,36 @@
-// FGAM_FlareProjectile - tracks flare arc via a per-tick timer
+// FGAM_FlareProjectile - fires airdrop event after fixed delay
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareProjectile.c
+//
+// s_Active keeps a ref so the object survives until FireEvent() runs.
+// Without it the object is GC'd immediately (local var goes out of scope)
+// and CallLater callback never fires.
 
 class FGAM_FlareTracker
 {
-    private string  m_Color;
-    private vector  m_LastPos;
-    private vector  m_PeakPos;
-    private float   m_PeakY;
-    private int     m_TicksStill;
-    private bool    m_Done;
-    private float   m_TimeAlive;
+    private static ref array<ref FGAM_FlareTracker> s_Active = new array<ref FGAM_FlareTracker>();
 
-    static const float TICK_INTERVAL = 0.5;
-    static const float MAX_LIFETIME  = 30.0;
-    static const int   STILL_TICKS   = 4;
+    private string m_Color;
+    private vector m_PeakPos;
+
+    static const int   FIRE_DELAY_MS   = 12000;
+    static const float PEAK_HEIGHT_EST = 80.0;
 
     void FGAM_FlareTracker(string color, vector startPos)
     {
         m_Color      = color;
-        m_LastPos    = startPos;
         m_PeakPos    = startPos;
-        m_PeakY      = startPos[1];
-        m_TicksStill = 0;
-        m_Done       = false;
-        m_TimeAlive  = 0;
+        m_PeakPos[1] = startPos[1] + PEAK_HEIGHT_EST;
 
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Tick, (int)(TICK_INTERVAL * 1000), false);
-    }
+        s_Active.Insert(this);
 
-    void Tick()
-    {
-        if (m_Done) return;
-
-        m_TimeAlive = m_TimeAlive + TICK_INTERVAL;
-        if (m_TimeAlive >= MAX_LIFETIME)
-        {
-            Print("[FGAM] FlareTracker timeout - firing event at peak");
-            FireEvent();
-            return;
-        }
-
-        array<Object> objects = new array<Object>;
-        GetGame().GetObjectsAtPosition3D(m_LastPos, 60, objects, null);
-
-        Object bestFlare;
-        float  bestDist = 9999;
-
-        foreach (Object obj : objects)
-        {
-            string cls = obj.GetType();
-            cls.ToLower();
-            if (cls.Contains("flare_projectile") || cls.Contains("flare_singleround"))
-            {
-                float d = vector.Distance(obj.GetPosition(), m_LastPos);
-                if (d < bestDist)
-                {
-                    bestDist  = d;
-                    bestFlare = obj;
-                }
-            }
-        }
-
-        if (!bestFlare)
-        {
-            m_TicksStill = m_TicksStill + 1;
-        }
-        else
-        {
-            vector pos = bestFlare.GetPosition();
-
-            if (pos[1] > m_PeakY)
-            {
-                m_PeakY   = pos[1];
-                m_PeakPos = pos;
-            }
-
-            float moved = vector.Distance(pos, m_LastPos);
-            m_LastPos   = pos;
-
-            if (moved < 0.5)
-                m_TicksStill = m_TicksStill + 1;
-            else
-                m_TicksStill = 0;
-        }
-
-        if (m_TicksStill >= STILL_TICKS)
-        {
-            Print("[FGAM] FlareTracker detected landing - firing event");
-            FireEvent();
-            return;
-        }
-
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Tick, (int)(TICK_INTERVAL * 1000), false);
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(FireEvent, FIRE_DELAY_MS, false);
+        Print("[FGAM] FlareTracker will fire in " + (FIRE_DELAY_MS / 1000) + "s, estimated peak=" + m_PeakPos);
     }
 
     private void FireEvent()
     {
-        m_Done = true;
-        FGAM_AirdropManager.Get().OnFlareEvent(m_Color, m_PeakPos, m_LastPos);
+        Print("[FGAM] FlareTracker firing event: color=" + m_Color + " peak=" + m_PeakPos);
+        FGAM_AirdropManager.Get().OnFlareEvent(m_Color, m_PeakPos, m_PeakPos);
+        s_Active.RemoveItem(this);
     }
 }

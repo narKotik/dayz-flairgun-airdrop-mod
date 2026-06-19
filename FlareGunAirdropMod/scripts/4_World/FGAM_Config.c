@@ -9,7 +9,7 @@ class FGAM_FlareConfig
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
     string airdropContainerClass = "SeaChest";
-    float  redZoneDelay          = 300.0;
+    float  redZoneDelay          = 30.0;
     float  redZoneRadius         = 50.0;
     float  redZoneDuration       = 1500.0;
 

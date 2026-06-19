@@ -5,7 +5,7 @@ class CfgPatches
         units[] = {};
         weapons[] = {};
         requiredVersion = 0.1;
-        requiredAddons[] = {"DZ_Weapons_Projectiles", "DZ_Weapons_Firearms", "DZ_Data"};
+        requiredAddons[] = {"DZ_Weapons_Projectiles", "DZ_Weapons_Firearms", "DZ_Weapons_Pistols", "DZ_Data"};
     };
 };
 

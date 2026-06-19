@@ -127,9 +127,7 @@ class FGAM_ToxicZoneTimer
     {
         if (!GetGame().IsServer()) return;
 
-        ContaminatedArea_Dynamic zone = ContaminatedArea_Dynamic.Cast(
-            GetGame().CreateObjectEx("ContaminatedArea_Dynamic", m_Position, ECE_CREATEPHYSICS)
-        );
+        ContaminatedArea_Dynamic zone = ContaminatedArea_Dynamic.Cast(GetGame().CreateObjectEx("ContaminatedArea_Dynamic", m_Position, ECE_CREATEPHYSICS));
 
         if (!zone)
         {

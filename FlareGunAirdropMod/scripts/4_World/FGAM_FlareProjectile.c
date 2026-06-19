@@ -1,12 +1,9 @@
-// ──────────────────────────────────────────────────────────────────────────────
-//  FGAM_FlareProjectile — tracks flare arc via a per-tick timer started from
-//  FlareGun.OnFire(). FlareSimulation is an engine type string, not a script
-//  class, so we cannot modded it. Instead FGAM_FlareTracker is a timer object
-//  spawned on the server that polls the nearest flare entity position until it
-//  stops moving, then fires the airdrop event.
+// FGAM_FlareProjectile - tracks flare arc via a per-tick timer
+// Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareProjectile.c
 //
-//  Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareProjectile.c
-// ──────────────────────────────────────────────────────────────────────────────
+// FlareSimulation is an engine type string, not a script class.
+// FGAM_FlareTracker is started from FlareGun.OnFire() and polls
+// the nearest flare entity position until it stops moving.
 
 class FGAM_FlareTracker
 {
@@ -14,13 +11,13 @@ class FGAM_FlareTracker
     private vector  m_LastPos;
     private vector  m_PeakPos;
     private float   m_PeakY;
-    private int     m_TicksStill;   // consecutive ticks with no movement
+    private int     m_TicksStill;
     private bool    m_Done;
     private float   m_TimeAlive;
 
-    static const float TICK_INTERVAL  = 0.5;   // seconds between polls
-    static const float MAX_LIFETIME   = 30.0;  // give up after 30s
-    static const int   STILL_TICKS    = 4;     // 4 ticks still = landed
+    static const float TICK_INTERVAL = 0.5;
+    static const float MAX_LIFETIME  = 30.0;
+    static const int   STILL_TICKS   = 4;
 
     void FGAM_FlareTracker(string color, vector startPos)
     {
@@ -32,7 +29,7 @@ class FGAM_FlareTracker
         m_Done       = false;
         m_TimeAlive  = 0;
 
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", TICK_INTERVAL * 1000, false);
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", (int)(TICK_INTERVAL * 1000), false);
     }
 
     void Tick()
@@ -42,12 +39,11 @@ class FGAM_FlareTracker
         m_TimeAlive += TICK_INTERVAL;
         if (m_TimeAlive >= MAX_LIFETIME)
         {
-            Print("[FGAM] FlareTracker timeout — firing event at peak");
+            Print("[FGAM] FlareTracker timeout - firing event at peak");
             FireEvent();
             return;
         }
 
-        // Find the nearest flare entity by searching around the last known position
         array<Object> objects = new array<Object>;
         GetGame().GetObjectsAtPosition3D(m_LastPos, 60, objects, null);
 
@@ -71,7 +67,6 @@ class FGAM_FlareTracker
 
         if (!bestFlare)
         {
-            // Can't find it — it may have landed and been cleaned up
             m_TicksStill++;
         }
         else
@@ -95,13 +90,12 @@ class FGAM_FlareTracker
 
         if (m_TicksStill >= STILL_TICKS)
         {
-            Print("[FGAM] FlareTracker detected landing — firing event");
+            Print("[FGAM] FlareTracker detected landing - firing event");
             FireEvent();
             return;
         }
 
-        // Schedule next tick
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", TICK_INTERVAL * 1000, false);
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(this, "Tick", (int)(TICK_INTERVAL * 1000), false);
     }
 
     private void FireEvent()

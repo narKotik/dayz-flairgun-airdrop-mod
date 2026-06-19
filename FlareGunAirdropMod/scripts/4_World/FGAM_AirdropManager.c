@@ -1,7 +1,5 @@
-// ──────────────────────────────────────────────────────────────────────────────
-//  FGAM_AirdropManager — server-side, handles all events triggered by flares
-//  Path: FlareGunAirdropMod/scripts/4_World/FGAM_AirdropManager.c
-// ──────────────────────────────────────────────────────────────────────────────
+// FGAM_AirdropManager - server-side handler for all flare events
+// Path: FlareGunAirdropMod/scripts/4_World/FGAM_AirdropManager.c
 
 class FGAM_AirdropManager
 {
@@ -14,34 +12,32 @@ class FGAM_AirdropManager
         return s_instance;
     }
 
-    // ── Entry point called from flare projectile ──────────────────────────────
-    //  color      : "RED" / "GREEN" / "BLUE" / "WHITE" / "YELLOW" / "BLACK" / "ORANGE"
-    //  impactPos  : world position where flare landed / peaked
-    //  shooterPos : position of the player who fired
-    void OnFlareEvent(string color, vector impactPos, vector shooterPos)
+    // Entry point called from FGAM_FlareTracker on landing
+    // color     : "RED" / "GREEN" / "BLUE" / "WHITE" / "YELLOW" / "BLACK" / "ORANGE"
+    // peakPos   : highest point of the flare arc
+    // impactPos : where the flare landed
+    void OnFlareEvent(string color, vector peakPos, vector impactPos)
     {
         if (!GetGame().IsServer()) return;
 
         FGAM_Config cfg = FGAM_Config.Get();
 
-        // ── Height check ──────────────────────────────────────────────────────
-        float terrainH = GetGame().SurfaceY(impactPos[0], impactPos[2]);
-        float altitude = impactPos[1] - terrainH;
+        // Height check - peak must be at least minTriggerAltitude above terrain
+        float terrainH = GetGame().SurfaceY(peakPos[0], peakPos[2]);
+        float altitude = peakPos[1] - terrainH;
 
         if (altitude < cfg.Flare.minTriggerAltitude)
         {
-            Print("[FGAM] Flare too low (" + altitude + "m) — event suppressed");
+            Print("[FGAM] Flare too low (" + altitude + "m) - event suppressed");
             return;
         }
 
-        Print("[FGAM] Flare event: " + color + " at " + impactPos + " (alt=" + altitude + "m)");
+        Print("[FGAM] Flare event: " + color + " at " + peakPos + " (alt=" + altitude + "m)");
 
-        // ── Dispatch ──────────────────────────────────────────────────────────
         switch (color)
         {
             case "RED":
-                // Crate spawns with the zone after delay, not immediately
-                ScheduleToxicZoneWithLoot(impactPos, cfg);
+                ScheduleToxicZoneWithLoot(peakPos, cfg);
                 break;
 
             case "GREEN":
@@ -50,7 +46,7 @@ class FGAM_AirdropManager
             case "YELLOW":
             case "BLACK":
             case "ORANGE":
-                SpawnAirdropCrate(impactPos, color, cfg);
+                SpawnAirdropCrate(peakPos, color, cfg);
                 break;
 
             default:
@@ -58,18 +54,13 @@ class FGAM_AirdropManager
         }
     }
 
-    // ── AIRDROP CRATE ─────────────────────────────────────────────────────────
-    private void SpawnAirdropCrate(vector impactPos, string color, FGAM_Config cfg)
+    // Spawn airdrop crate above impact position
+    private void SpawnAirdropCrate(vector pos, string color, FGAM_Config cfg)
     {
-        // Spawn container above impact, let physics carry it down
-        vector spawnPos = impactPos;
-        spawnPos[1] = impactPos[1] + cfg.Flare.airdropSpawnHeight;
+        vector spawnPos = pos;
+        spawnPos[1] = pos[1] + cfg.Flare.airdropSpawnHeight;
 
-        Object obj = GetGame().CreateObjectEx(
-            cfg.Flare.airdropContainerClass,
-            spawnPos,
-            ECE_CREATEPHYSICS | ECE_UPDATEPATHGRAPH
-        );
+        Object obj = GetGame().CreateObjectEx(cfg.Flare.airdropContainerClass, spawnPos, ECE_CREATEPHYSICS);
 
         if (!obj)
         {
@@ -77,9 +68,8 @@ class FGAM_AirdropManager
             return;
         }
 
-        // Enable physics / gravity
         obj.SetPosition(spawnPos);
-        obj.PlaceOnSurface();   // overridden by physics immediately
+        obj.PlaceOnSurface();
 
         ItemBase crate = ItemBase.Cast(obj);
         if (crate)
@@ -88,7 +78,7 @@ class FGAM_AirdropManager
         Print("[FGAM] Airdrop crate spawned for " + color + " at " + spawnPos);
     }
 
-    // ── Fill crate with loot from config ──────────────────────────────────────
+    // Fill crate with loot from config
     private void FillCrate(ItemBase crate, string color, FGAM_Config cfg)
     {
         TStringArray items = cfg.GetLootForColor(color);
@@ -100,7 +90,6 @@ class FGAM_AirdropManager
             EntityAI item = crateEntity.GetInventory().CreateInInventory(itemClass);
             if (!item)
             {
-                // Try spawning nearby if no space
                 vector nearby = crate.GetPosition();
                 nearby[0] += Math.RandomFloat(-0.5, 0.5);
                 nearby[2] += Math.RandomFloat(-0.5, 0.5);
@@ -109,29 +98,22 @@ class FGAM_AirdropManager
         }
     }
 
-    // ── RED — schedule toxic zone + loot drop together after delay ───────────
+    // RED - schedule toxic zone + loot after delay
     private void ScheduleToxicZoneWithLoot(vector pos, FGAM_Config cfg)
     {
         FGAM_ToxicZoneTimer timer = new FGAM_ToxicZoneTimer();
-        timer.m_Position      = pos;
-        timer.m_Radius        = cfg.Flare.redZoneRadius;
-        timer.m_Duration      = cfg.Flare.redZoneDuration;
-        timer.m_SpawnHeight   = cfg.Flare.airdropSpawnHeight;
+        timer.m_Position       = pos;
+        timer.m_Radius         = cfg.Flare.redZoneRadius;
+        timer.m_Duration       = cfg.Flare.redZoneDuration;
+        timer.m_SpawnHeight    = cfg.Flare.airdropSpawnHeight;
         timer.m_ContainerClass = cfg.Flare.airdropContainerClass;
-        timer.m_LootColor     = "RED";
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(
-            timer,
-            "Activate",
-            (int)(cfg.Flare.redZoneDelay * 1000),
-            false
-        );
+        timer.m_LootColor      = "RED";
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(timer, "Activate", (int)(cfg.Flare.redZoneDelay * 1000), false);
         Print("[FGAM] Toxic zone + loot scheduled in " + cfg.Flare.redZoneDelay + "s at " + pos);
     }
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-//  Timer — spawns toxic zone AND loot crate together, removes both on expiry
-// ──────────────────────────────────────────────────────────────────────────────
+// Spawns toxic zone AND loot crate together, removes both on expiry
 class FGAM_ToxicZoneTimer
 {
     vector m_Position;
@@ -145,13 +127,8 @@ class FGAM_ToxicZoneTimer
     {
         if (!GetGame().IsServer()) return;
 
-        // ── Spawn toxic zone ─────────────────────────────────────────────────
         ContaminatedArea_Dynamic zone = ContaminatedArea_Dynamic.Cast(
-            GetGame().CreateObjectEx(
-                "ContaminatedArea_Dynamic",
-                m_Position,
-                ECE_CREATEPHYSICS | ECE_UPDATEPATHGRAPH
-            )
+            GetGame().CreateObjectEx("ContaminatedArea_Dynamic", m_Position, ECE_CREATEPHYSICS)
         );
 
         if (!zone)
@@ -164,16 +141,11 @@ class FGAM_ToxicZoneTimer
         zone.SetInnerRadius(m_Radius * 0.6);
         zone.SetOuterRadius(m_Radius);
 
-        // ── Spawn loot crate above zone centre ───────────────────────────────
-        ItemBase crate;
-        vector spawnPos    = m_Position;
-        spawnPos[1]        = m_Position[1] + m_SpawnHeight;
-        Object crateObj    = GetGame().CreateObjectEx(
-            m_ContainerClass,
-            spawnPos,
-            ECE_CREATEPHYSICS | ECE_UPDATEPATHGRAPH
-        );
+        vector spawnPos = m_Position;
+        spawnPos[1] = m_Position[1] + m_SpawnHeight;
+        Object crateObj = GetGame().CreateObjectEx(m_ContainerClass, spawnPos, ECE_CREATEPHYSICS);
 
+        ItemBase crate;
         if (crateObj)
         {
             crate = ItemBase.Cast(crateObj);
@@ -201,19 +173,12 @@ class FGAM_ToxicZoneTimer
             Print("[FGAM] Warning: failed to spawn loot crate for RED zone");
         }
 
-        // ── Schedule zone + loot removal ────────────────────────────────────
         FGAM_ToxicZoneRemover remover = new FGAM_ToxicZoneRemover();
         remover.m_Zone  = zone;
         remover.m_Crate = crate;
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(
-            remover,
-            "Remove",
-            (int)(m_Duration * 1000),
-            false
-        );
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(remover, "Remove", (int)(m_Duration * 1000), false);
 
-        Print("[FGAM] Toxic zone activated at " + m_Position
-            + " — lasts " + m_Duration + "s, loot will be removed with zone");
+        Print("[FGAM] Toxic zone activated at " + m_Position + " - lasts " + m_Duration + "s");
     }
 }
 
@@ -229,10 +194,8 @@ class FGAM_ToxicZoneRemover
             GetGame().ObjectDelete(m_Zone);
             Print("[FGAM] Toxic zone removed");
         }
-
         if (m_Crate)
         {
-            // Delete crate and everything in it
             GetGame().ObjectDelete(m_Crate);
             Print("[FGAM] Red zone loot crate removed");
         }

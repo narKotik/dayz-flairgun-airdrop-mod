@@ -1,27 +1,21 @@
-// ──────────────────────────────────────────────────────────────────────────────
-//  FGAM_FlareGun — modded FlareGun: block repair, degrade on each shot
-//  Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
-// ──────────────────────────────────────────────────────────────────────────────
+// FGAM_FlareGun - modded FlareGun: block repair, degrade on each shot, spawn tracker
+// Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
 
 modded class FlareGun
 {
-    // Track how many shots have been fired in the current health state
     private int m_FGAM_ShotsInState = 0;
 
-    // ── Block all repair actions ──────────────────────────────────────────────
     override bool CanBeRepaired(EntityAI item, float healthLevel, int damage)
     {
         return false;
     }
 
-    // ── Called after each shot ────────────────────────────────────────────────
     override void OnFire(int muzzleIndex)
     {
         super.OnFire(muzzleIndex);
 
         if (!GetGame().IsServer()) return;
 
-        // Start tracking this flare's arc and landing position
         string color = FGAM_GetCurrentColor();
         if (color != "")
         {
@@ -42,52 +36,6 @@ modded class FlareGun
         }
     }
 
-    // ── Map current magazine class → color string ─────────────────────────────
-    private string FGAM_GetCurrentColor()
-    {
-        Magazine mag = GetMagazine(GetCurrentMuzzle());
-        if (!mag) return "";
-        string cls = mag.GetType();
-        cls.ToLower();
-        if (cls.Contains("_red"))    return "RED";
-        if (cls.Contains("_green"))  return "GREEN";
-        if (cls.Contains("_blue"))   return "BLUE";
-        if (cls.Contains("_white"))  return "WHITE";
-        if (cls.Contains("_yellow")) return "YELLOW";
-        if (cls.Contains("_black"))  return "BLACK";
-        if (cls.Contains("_orange")) return "ORANGE";
-        return "";
-    }
-
-    // ── Drop one condition tier ───────────────────────────────────────────────
-    private void DegradeCondition()
-    {
-        EItemCondition current = GetItemCondition();
-
-        switch (current)
-        {
-            case EItemCondition.PRISTINE:
-                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.75);
-                break;
-            case EItemCondition.WORN:
-                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.50);
-                break;
-            case EItemCondition.DAMAGED:
-                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.25);
-                break;
-            case EItemCondition.BADLY_DAMAGED:
-                // Next shot will destroy it
-                SetHealth("", "Health", 0.0);
-                break;
-            case EItemCondition.RUINED:
-                // Already ruined — nothing more to do
-                break;
-        }
-
-        Print("[FGAM] FlareGun degraded to condition: " + GetItemCondition());
-    }
-
-    // ── Called after CE places the gun in the world ──────────────────────────
     override void EEInit()
     {
         super.EEInit();
@@ -131,7 +79,47 @@ modded class FlareGun
             Print("[FGAM] FlareGun spawned with " + color + " magazine (ctx=" + ctx + ")");
     }
 
-    // ── Serialise shot counter so it survives server restarts ─────────────────
+    private string FGAM_GetCurrentColor()
+    {
+        Magazine mag = GetMagazine(GetCurrentMuzzle());
+        if (!mag) return "";
+        string cls = mag.GetType();
+        cls.ToLower();
+        if (cls.Contains("_red"))    return "RED";
+        if (cls.Contains("_green"))  return "GREEN";
+        if (cls.Contains("_blue"))   return "BLUE";
+        if (cls.Contains("_white"))  return "WHITE";
+        if (cls.Contains("_yellow")) return "YELLOW";
+        if (cls.Contains("_black"))  return "BLACK";
+        if (cls.Contains("_orange")) return "ORANGE";
+        return "";
+    }
+
+    private void DegradeCondition()
+    {
+        EItemCondition current = GetItemCondition();
+
+        switch (current)
+        {
+            case EItemCondition.PRISTINE:
+                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.75);
+                break;
+            case EItemCondition.WORN:
+                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.50);
+                break;
+            case EItemCondition.DAMAGED:
+                SetHealth("", "Health", GetMaxHealth("", "Health") * 0.25);
+                break;
+            case EItemCondition.BADLY_DAMAGED:
+                SetHealth("", "Health", 0.0);
+                break;
+            case EItemCondition.RUINED:
+                break;
+        }
+
+        Print("[FGAM] FlareGun degraded to condition: " + GetItemCondition());
+    }
+
     override void OnStoreSave(ParamsWriteContext ctx)
     {
         super.OnStoreSave(ctx);

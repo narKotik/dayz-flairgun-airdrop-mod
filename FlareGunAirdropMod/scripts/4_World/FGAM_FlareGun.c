@@ -1,7 +1,9 @@
-// FGAM_FlareGun - modded FlareGun: block repair, degrade on each shot, spawn tracker
+// FGAM_FlareGun - script class for vanilla FlareGun (config-only in vanilla,
+// no existing script class). Defining it here without 'modded' creates the
+// script association. Inherits Pistol_Base like all DayZ pistol-type weapons.
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
 
-modded class FlareGun
+class FlareGun : Pistol_Base
 {
     private int m_FGAM_ShotsInState = 0;
 
@@ -19,8 +21,7 @@ modded class FlareGun
         string color = FGAM_GetCurrentColor();
         if (color != "")
         {
-            vector startPos = GetPosition();
-            FGAM_FlareTracker tracker = new FGAM_FlareTracker(color, startPos);
+            FGAM_FlareTracker tracker = new FGAM_FlareTracker(color, GetPosition());
             Print("[FGAM] FlareTracker started for color: " + color);
         }
 
@@ -46,8 +47,8 @@ modded class FlareGun
         if (ctx == FGAM_SpawnContext.NONE) return;
 
         FGAM_Config cfg = FGAM_Config.Get();
-        string color;
         TStringIntMap weights;
+        string color;
 
         switch (ctx)
         {
@@ -98,7 +99,6 @@ modded class FlareGun
     private void DegradeCondition()
     {
         EItemCondition current = GetItemCondition();
-
         switch (current)
         {
             case EItemCondition.PRISTINE:
@@ -116,7 +116,6 @@ modded class FlareGun
             case EItemCondition.RUINED:
                 break;
         }
-
         Print("[FGAM] FlareGun degraded to condition: " + GetItemCondition());
     }
 

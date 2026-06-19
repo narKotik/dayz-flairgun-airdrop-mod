@@ -1,20 +1,16 @@
-// FGAM_FlareGun - modded FlareGun: block repair, degrade on shot, spawn tracker
+// FGAM_FlareGun - hooks into Weapon_Base (FlareGun has no vanilla script class)
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
 
-modded class FlareGun
+modded class Weapon_Base
 {
     private int m_FGAM_ShotsInState = 0;
-
-    override bool CanBeRepaired(EntityAI item, float healthLevel, int damage)
-    {
-        return false;
-    }
 
     override void OnFire(int muzzleIndex)
     {
         super.OnFire(muzzleIndex);
 
         if (!GetGame().IsServer()) return;
+        if (GetType() != "FlareGun") return;
 
         string color = FGAM_GetCurrentColor();
         if (color != "")
@@ -31,7 +27,7 @@ modded class FlareGun
         if (m_FGAM_ShotsInState >= shotsNeeded)
         {
             m_FGAM_ShotsInState = 0;
-            DegradeCondition();
+            FGAM_DegradeCondition();
         }
     }
 
@@ -40,6 +36,7 @@ modded class FlareGun
         super.EEInit();
 
         if (!GetGame().IsServer()) return;
+        if (GetType() != "FlareGun") return;
 
         FGAM_SpawnContext ctx = FGAM_DetectSpawnContext(GetPosition());
         if (ctx == FGAM_SpawnContext.NONE) return;
@@ -51,21 +48,15 @@ modded class FlareGun
         switch (ctx)
         {
             case FGAM_SpawnContext.HELICRASH:
-                weights = cfg.Flare.helicrashFlareWeights;
-                color   = FGAM_PickWeightedColor(weights);
+                color = FGAM_PickWeightedColor(cfg.Flare.helicrashFlareWeights);
                 break;
-
             case FGAM_SpawnContext.TRAIN:
-                weights = cfg.Flare.trainFlareWeights;
-                color   = FGAM_PickWeightedColor(weights);
+                color = FGAM_PickWeightedColor(cfg.Flare.trainFlareWeights);
                 break;
-
             case FGAM_SpawnContext.BEACH:
-                weights = cfg.Flare.beachFlareWeights;
-                color   = FGAM_PickWeightedColor(weights);
+                color = FGAM_PickWeightedColor(cfg.Flare.beachFlareWeights);
                 SetHealth("", "Health", GetMaxHealth("", "Health") * 0.26);
                 break;
-
             default:
                 return;
         }
@@ -76,6 +67,12 @@ modded class FlareGun
             Print("[FGAM] Warning: could not load magazine " + magClass + " into FlareGun");
         else
             Print("[FGAM] FlareGun spawned with " + color + " magazine (ctx=" + ctx + ")");
+    }
+
+    override bool CanBeRepaired(EntityAI item, float healthLevel, int damage)
+    {
+        if (GetType() == "FlareGun") return false;
+        return super.CanBeRepaired(item, healthLevel, damage);
     }
 
     private string FGAM_GetCurrentColor()
@@ -94,7 +91,7 @@ modded class FlareGun
         return "";
     }
 
-    private void DegradeCondition()
+    private void FGAM_DegradeCondition()
     {
         EItemCondition current = GetItemCondition();
         switch (current)
@@ -120,13 +117,17 @@ modded class FlareGun
     override void OnStoreSave(ParamsWriteContext ctx)
     {
         super.OnStoreSave(ctx);
-        ctx.Write(m_FGAM_ShotsInState);
+        if (GetType() == "FlareGun")
+            ctx.Write(m_FGAM_ShotsInState);
     }
 
     override bool OnStoreLoad(ParamsReadContext ctx, int version)
     {
         if (!super.OnStoreLoad(ctx, version)) return false;
-        if (!ctx.Read(m_FGAM_ShotsInState))  return false;
+        if (GetType() == "FlareGun")
+        {
+            if (!ctx.Read(m_FGAM_ShotsInState)) return false;
+        }
         return true;
     }
 }

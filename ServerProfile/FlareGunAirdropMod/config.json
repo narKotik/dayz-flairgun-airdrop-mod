@@ -3,7 +3,7 @@
 
     "flare": {
         "_comment_shotsPerState": "Shots before the gun drops one health tier (1-3 recommended)",
-        "shotsPerState": 1,
+        "shotsPerState": 2,
 
         "_comment_minTriggerAltitude": "Minimum height above terrain (metres) the flare must reach to trigger event",
         "minTriggerAltitude": 50.0,
@@ -11,16 +11,22 @@
         "_comment_maxTriggerRadius": "Max horizontal distance (metres) from shooter to count as a valid signal",
         "maxTriggerRadius": 1500.0,
 
-        "_comment_airdropSpawnHeight": "How many metres above impact the crate spawns before falling",
+        "_comment_airdropSpawnHeight": "How many metres above the ground the crate spawns before it descends",
         "airdropSpawnHeight": 100.0,
 
-        "_comment_airdropContainerClass": "DayZ class name of the container used for airdrops",
-        "airdropContainerClass": "SeaChest",
+        "_comment_airdropDescentSpeed": "How fast (metres/second) the crate falls from the sky",
+        "airdropDescentSpeed": 6.0,
 
-        "_comment_red_zone": "Red flare — toxic zone settings",
+        "_comment_airdropLifetime": "Seconds the landed crate stays in the world before it despawns (1800 = 30 min). Currently 300 = 5 min for testing.",
+        "airdropLifetime": 300.0,
+
+        "_comment_airdropContainerClass": "DayZ class name of the container used for airdrops (FGAM_AirdropContainer = big-cargo crate added by this mod)",
+        "airdropContainerClass": "FGAM_AirdropContainer",
+
+        "_comment_red_zone": "Red flare — toxic zone. redZoneDelay = seconds before the zone spawns; after spawning, the dynamic gas plays a short artillery announcement then appears. redZoneDuration = seconds before the zone + crate are removed. NOTE: redZoneRadius is currently unused — the dynamic gas zone uses its own built-in ~120m footprint.",
         "redZoneDelay": 300.0,
         "redZoneRadius": 50.0,
-        "redZoneDuration": 1500.0
+        "redZoneDuration": 300.0
     },
 
     "loot_RED": {

@@ -17,6 +17,9 @@ BEServer*.cfg
 *.log
 P:\
 
+# ── Unpacked vanilla game data (reference only — copyrighted, never commit) ────
+.vanilla_ref/
+
 # ── Claude Code internal files ────────────────────────────────────────────────
 .claude/
 

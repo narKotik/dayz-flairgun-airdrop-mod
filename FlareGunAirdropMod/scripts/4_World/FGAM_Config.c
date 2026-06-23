@@ -8,8 +8,10 @@ class FGAM_FlareConfig
     float  minTriggerAltitude    = 50.0;
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
-    string airdropContainerClass = "SeaChest";
-    float  redZoneDelay          = 30.0;
+    float  airdropDescentSpeed   = 6.0;     // metres/second the crate falls
+    float  airdropLifetime       = 1800.0;  // seconds before the crate despawns (30 min)
+    string airdropContainerClass = "FGAM_AirdropContainer";
+    float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;
     float  redZoneDuration       = 1500.0;
 
@@ -50,8 +52,22 @@ class FGAM_Config
 
     void Load()
     {
-        Print("[FGAM] Loading defaults config");
+        // Always establish a full, valid default state first.
         LoadDefaults();
+
+        // Then overlay anything the server admin set in the profile JSON.
+        string path = "$profile:FlareGunAirdropMod/config.json";
+        if (FileExist(path))
+        {
+            FGAM_JsonRoot root = new FGAM_JsonRoot();
+            JsonFileLoader<FGAM_JsonRoot>.JsonLoadFile(path, root);
+            ApplyJson(root);
+            Print("[FGAM] Config loaded from " + path);
+        }
+        else
+        {
+            Print("[FGAM] No config.json at " + path + " - using built-in defaults");
+        }
     }
 
     private void ApplyJson(FGAM_JsonRoot root)
@@ -62,7 +78,12 @@ class FGAM_Config
             FlareSettings.minTriggerAltitude     = root.flare.minTriggerAltitude;
             FlareSettings.maxTriggerRadius       = root.flare.maxTriggerRadius;
             FlareSettings.airdropSpawnHeight     = root.flare.airdropSpawnHeight;
-            FlareSettings.airdropContainerClass  = root.flare.airdropContainerClass;
+            if (root.flare.airdropDescentSpeed > 0)
+                FlareSettings.airdropDescentSpeed = root.flare.airdropDescentSpeed;
+            if (root.flare.airdropLifetime > 0)
+                FlareSettings.airdropLifetime    = root.flare.airdropLifetime;
+            if (root.flare.airdropContainerClass != "")
+                FlareSettings.airdropContainerClass = root.flare.airdropContainerClass;
             FlareSettings.redZoneDelay           = root.flare.redZoneDelay;
             FlareSettings.redZoneRadius          = root.flare.redZoneRadius;
             FlareSettings.redZoneDuration        = root.flare.redZoneDuration;
@@ -78,11 +99,15 @@ class FGAM_Config
         colors.Insert("ORANGE");
         foreach (string color : colors)
         {
-            TStringArray items = new TStringArray();
+            // Only override the default loot for a colour when the JSON
+            // actually supplies a non-empty list; otherwise keep the defaults.
             FGAM_JsonLootTable tbl = root.GetLootTable(color);
-            if (tbl && tbl.items)
+            if (tbl && tbl.items && tbl.items.Count() > 0)
+            {
+                TStringArray items = new TStringArray();
                 items.Copy(tbl.items);
-            LootTables.Set(color, items);
+                LootTables.Set(color, items);
+            }
         }
 
         if (root.spawnWeights)
@@ -208,10 +233,12 @@ class FGAM_JsonFlareSettings
     float  minTriggerAltitude    = 50.0;
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
-    string airdropContainerClass = "SeaChest";
+    float  airdropDescentSpeed   = 6.0;
+    float  airdropLifetime       = 1800.0;
+    string airdropContainerClass = "FGAM_AirdropContainer";
     float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;
-    float  redZoneDuration       = 600.0;
+    float  redZoneDuration       = 1500.0;
 };
 
 class FGAM_JsonLootTable

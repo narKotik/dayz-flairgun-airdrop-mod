@@ -18,20 +18,14 @@ class FGAM_AirdropManager
 
         FGAM_Config cfg = FGAM_Config.Get();
 
-        float terrainH = GetGame().SurfaceY(peakPos[0], peakPos[2]);
-        float altitude = peakPos[1] - terrainH;
+        // The "fired upward enough" gate already ran at fire time
+        // (Weapon_Base.FGAM_FiredUpward), so we only get here for valid shots.
 
-        if (altitude < cfg.FlareSettings.minTriggerAltitude)
-        {
-            Print("[FGAM] Flare too low (" + altitude + "m) - event suppressed");
-            return;
-        }
-
-        // Drop point: directly under the flare's peak, at ground level.
+        // Drop point: directly under where the flare was fired, at ground level.
         vector groundPos = peakPos;
         groundPos[1] = GetGame().SurfaceY(peakPos[0], peakPos[2]);
 
-        Print("[FGAM] Flare event: " + color + " at " + groundPos + " (alt=" + altitude + "m)");
+        Print("[FGAM] Flare event: " + color + " at " + groundPos);
 
         switch (color)
         {

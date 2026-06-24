@@ -21,7 +21,9 @@ class FGAM_ToxicArea : ContaminatedArea_Local
 {
     override void SetupZoneData(EffectAreaParams params)
     {
-        m_TriggerType      = "ContaminatedTrigger_Local";
+        // Base "ContaminatedTrigger" (not the silent "_Local" one) so players get
+        // the vanilla contaminated-area ambient gas hiss while inside the cloud.
+        m_TriggerType      = "ContaminatedTrigger";
         m_Radius           = 40;
         m_PositiveHeight   = 12;
         m_NegativeHeight   = 6;

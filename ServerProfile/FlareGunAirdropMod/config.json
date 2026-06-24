@@ -5,8 +5,8 @@
         "_comment_shotsPerState": "Shots before the gun drops one health tier (1-3 recommended)",
         "shotsPerState": 2,
 
-        "_comment_minTriggerAltitude": "Minimum height above terrain (metres) the flare must reach to trigger event",
-        "minTriggerAltitude": 50.0,
+        "_comment_minTriggerPitch": "Minimum angle above horizontal (degrees) the flare must be fired to trigger the event. Firing flat/parallel to the ground does nothing. 0 = trigger from any angle.",
+        "minTriggerPitch": 30.0,
 
         "_comment_maxTriggerRadius": "Max horizontal distance (metres) from shooter to count as a valid signal",
         "maxTriggerRadius": 1500.0,

@@ -10,27 +10,28 @@ class FGAM_FlareTracker
     private static ref array<ref FGAM_FlareTracker> s_Active = new array<ref FGAM_FlareTracker>();
 
     private string m_Color;
-    private vector m_PeakPos;
+    private vector m_OriginPos; // ground position under the shooter at fire time
 
-    static const int   FIRE_DELAY_MS   = 12000;
-    static const float PEAK_HEIGHT_EST = 80.0;
+    static const int FIRE_DELAY_MS = 12000;
 
+    // The upward-pitch gate now happens in Weapon_Base.OnFire (FGAM_FiredUpward),
+    // so by the time a tracker exists the shot already qualified. We just remember
+    // where it was fired from and dispatch the event after a short delay.
     void FGAM_FlareTracker(string color, vector startPos)
     {
-        m_Color      = color;
-        m_PeakPos    = startPos;
-        m_PeakPos[1] = startPos[1] + PEAK_HEIGHT_EST;
+        m_Color     = color;
+        m_OriginPos = startPos;
 
         s_Active.Insert(this);
 
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(FireEvent, FIRE_DELAY_MS, false);
-        Print("[FGAM] FlareTracker will fire in " + (FIRE_DELAY_MS / 1000) + "s, estimated peak=" + m_PeakPos);
+        Print("[FGAM] FlareTracker will fire in " + (FIRE_DELAY_MS / 1000) + "s, origin=" + m_OriginPos);
     }
 
     private void FireEvent()
     {
-        Print("[FGAM] FlareTracker firing event: color=" + m_Color + " peak=" + m_PeakPos);
-        FGAM_AirdropManager.Get().OnFlareEvent(m_Color, m_PeakPos, m_PeakPos);
+        Print("[FGAM] FlareTracker firing event: color=" + m_Color + " origin=" + m_OriginPos);
+        FGAM_AirdropManager.Get().OnFlareEvent(m_Color, m_OriginPos, m_OriginPos);
         s_Active.RemoveItem(this);
     }
 }

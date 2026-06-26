@@ -108,6 +108,16 @@ It defines spawn rules for the flare gun + all 7 flare magazines. Example entry:
 > spam stops. Adjust `usage` / `value` / `nominal` to change where and how often flares
 > appear — full detail in [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.
 
+> **The flare gun entry MUST be named exactly `Flaregun`** (lowercase g — the vanilla
+> class). Vanilla sets `Flaregun` to `nominal 0` (never world-spawned), and this entry
+> *overrides* that. A wrong-case name like `FlareGun` silently fails to override, so the
+> vanilla `nominal 0` wins and **the gun never spawns anywhere.**
+
+> **No rebuild needed for any of this.** These are mission CE files, not the PBO —
+> edit `FGAM_types.xml`, restart the server, done. (For changes to take effect on an
+> already-populated map, wipe the CE storage — `storage_1/data/*` — so it repopulates;
+> otherwise new counts fill in slowly via restock.)
+
 **b) `mpmissions/<your.mission>/cfgeconomycore.xml`** — tell CE to load that file (this
 keeps the vanilla `types.xml` untouched). Add inside `<economycore>`:
 ```xml

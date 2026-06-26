@@ -14,8 +14,9 @@ if not exist "%P_MOD%" mkdir "%P_MOD%"
 copy /y "%PROJECT%\config.cpp" "%P_MOD%\config.cpp" >nul
 copy /y "%PROJECT%\mod.cpp"    "%P_MOD%\mod.cpp"    >nul
 :: /purge removes files in P: that were deleted from the repo (prevents stale builds)
-robocopy "%PROJECT%\FlareGunAirdropMod\scripts" "%P_MOD%\scripts" /e /purge /njh /njs /ndl /nc /ns >nul
-robocopy "%PROJECT%\FlareGunAirdropMod\data"    "%P_MOD%\data"    /e /purge /njh /njs /ndl /nc /ns >nul
+robocopy "%PROJECT%\FlareGunAirdropMod\scripts"   "%P_MOD%\scripts"   /e /purge /njh /njs /ndl /nc /ns >nul
+robocopy "%PROJECT%\FlareGunAirdropMod\data"      "%P_MOD%\data"      /e /purge /njh /njs /ndl /nc /ns >nul
+robocopy "%PROJECT%\FlareGunAirdropMod\Graphics"  "%P_MOD%\Graphics"  /e /purge /njh /njs /ndl /nc /ns >nul
 
 echo === 2/4 Binarizing config.cpp -^> config.bin ===
 "%TOOLS%\CfgConvert\CfgConvert.exe" -bin -dst "%P_MOD%\config.bin" "%P_MOD%\config.cpp"

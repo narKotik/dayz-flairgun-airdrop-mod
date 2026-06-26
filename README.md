@@ -12,8 +12,8 @@ and can't be changed — so flares are told apart by name + airdrop.
 
 How it's built:
 
-- **Color / brightness** → `FGAM_FlareLight*` in `FGAM_FlareVisuals.c` (client visuals)
-- **Flame + smoke color** → particle ids in `FGAM_FlareSimulation_*` (client visuals)
+- **Light colour / brightness** → `FGAM_FlareLight*` in `FGAM_FlareVisuals.c` (client visuals)
+- **Flame + smoke colour** → our own recoloured particles in `FlareGunAirdropMod/Graphics/Particles/*.ptc`, registered in `FGAM_Particles.c` and used as each flare's core particle (engine keeps it glued to the flare)
 - **Rise / fall / burn time** → `FGAM_Bullet_FlareBase` ballistics in `config.cpp`
 - **Airdrop trigger** → `Weapon_Base.OnFire` in `FGAM_FlareGun.c` (server-side; reads
   the fired ammo's color, gated by aim pitch + roof check)

@@ -44,85 +44,168 @@ free, with credit). FGAM extends `Flaregun_Base.chamberableFrom` so it stays
 
 ## How it works
 
-1. Player fires flare gun into the sky (must reach ≥50m above terrain). Each colour has its own coloured cartridge (Orange/White/Dark added via rvmat recolour). The in-air burning trace uses the nearest vanilla flare colour.
-2. Server-side script reads the ammo color from the projectile class.
-3. A big-cargo airdrop crate (`FGAM_AirdropContainer`) spawns ~100m above the flare's peak and descends gently to the ground (server-driven, visible to all players). All loot rides down **inside the crate's cargo**; anything that can't fit drops beside it.
-4. Loot is filled from `config.json` inside the server profile folder.
-5. The landed crate is automatically removed after `airdropLifetime` seconds (default 30 min).
-6. Red flares instead spawn a working **toxic gas zone** (`ContaminatedArea_Static`) after `redZoneDelay`, with a military crate dropped into the gas. Both clear after `redZoneDuration`.
+1. Player fires the flare gun **aimed up into the open sky** (firing flat, or into a
+   ceiling/roof, does nothing — gated by `minTriggerPitch` + a roof check). Each colour
+   is its own cartridge (`FGAM_Mag_<Colour>`) that fires its own coloured flame + smoke
+   (our own particles).
+2. Server-side, `Weapon_Base.EEFired` reads the fired round's colour.
+3. A big-cargo crate (`FGAM_AirdropContainer`) spawns `airdropSpawnHeight` m above the
+   shooter and descends gently (server-driven, visible to everyone). Loot rides down
+   **inside the crate's cargo**; anything that doesn't fit drops beside it.
+4. The crate's loot comes from the `loot_<COLOUR>` list in `config.json`.
+5. The landed crate is removed after `airdropLifetime` seconds.
+6. **Red** instead spawns a toxic gas zone (`FGAM_ToxicArea`) after `redZoneDelay`, with
+   a military crate dropped into the gas. Both clear after `redZoneDuration`.
 
-## Installation
+## Server setup & configuration
 
-### 1. Workshop / @mod folder
-Copy `FlareGunAirdropMod/` into your DayZ server's `@FlareGunAirdropMod/` add-on folder.  
-Add `-mod=@FlareGunAirdropMod` to your server start parameters.
+Everything an admin touches, grouped by **where it lives**. Only the `@FlareGunAirdropMod`
+PBO is "the mod"; the rest are ordinary server/mission files you edit. The two helper
+scripts `1_copy_to_P.bat` (build) and `2_deploy.bat` (deploy) automate all of this for a
+local server + client.
 
-### 2. Economy (types.xml)
-Either:
-- Copy the contents of `db/FGAM_types.xml` into your mission's `db/types.xml`, or
-- Copy `db/FGAM_types.xml` into your mission's `db/` folder and add the `db/cfgeconomycore.xml` `<ce>` entry so CE loads it as a separate file (keeps vanilla `types.xml` untouched). This is what `2_deploy.bat` does.
+### 1. Install the mod (server + every client)
+- Copy the built `@FlareGunAirdropMod/` folder onto the server (and each client, or
+  publish it to the Workshop).
+- Add it to the server start parameters — load order relative to other mods doesn't
+  matter:
+  ```
+  -mod=@CF;@VPPAdminTools;@FlareGunAirdropMod
+  ```
+  **FGAM has no mod dependencies.** `@CF` / `@VPPAdminTools` above are just this server's
+  other mods; FGAM only needs itself.
+- If the server verifies signatures, copy the mod key into the server's `keys/` folder:
+  ```
+  @FlareGunAirdropMod/keys/FGAM_v1.bikey  ->  <server>/keys/FGAM_v1.bikey
+  ```
 
-### 3. Server config (config.json)
-Copy `ServerProfile/FlareGunAirdropMod/config.json` to:
+### 2. Make flares & the gun spawn in the world (mission CE files — not the mod)
+Central-economy setup, in your **mission** folder. Two files:
+
+**a) `mpmissions/<your.mission>/db/FGAM_types.xml`** — copy it from this repo's `db/`.
+It defines spawn rules for the flare gun + all 7 flare magazines. Example entry:
+```xml
+<type name="FGAM_Mag_Green">
+    <nominal>3</nominal>      <!-- target count present on the map at once -->
+    <lifetime>7200</lifetime> <!-- seconds an untouched one survives -->
+    <restock>900</restock>    <!-- seconds before depleted stock is topped up -->
+    <min>0</min>              <!-- 0 on purpose - see the note below -->
+    <quantmin>-1</quantmin>
+    <quantmax>-1</quantmax>
+    <cost>100</cost>
+    <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+    <category name="weapons"/>
+    <usage name="Hunting"/>   <!-- WHICH buildings: Military/Police/Medic/Hunting/Civilian/Industrial -->
+    <usage name="Civilian"/>
+    <value name="Tier1"/>     <!-- WHICH map regions; omit <value> for everywhere -->
+    <value name="Tier2"/>
+</type>
+```
+> **Why `min` is 0:** the flare round model is awkward for CE to place on surfaces
+> (vanilla ships flares at `nominal=0` for this reason). A non-zero `min` forces CE to
+> keep re-placing them every loop, flooding the server log with `is hard to place` /
+> `exceeded max tests`. With `min=0`, CE fills toward `nominal` opportunistically and the
+> spam stops. Adjust `usage` / `value` / `nominal` to change where and how often flares
+> appear — full detail in [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.
+
+**b) `mpmissions/<your.mission>/cfgeconomycore.xml`** — tell CE to load that file (this
+keeps the vanilla `types.xml` untouched). Add inside `<economycore>`:
+```xml
+<ce folder="db">
+    <file name="FGAM_types.xml" type="types"/>
+</ce>
+```
+(Alternatively, paste the `FGAM_types.xml` entries straight into the mission's
+`db/types.xml` and skip this step — but the separate file is cleaner to maintain.)
+
+### 3. Tune behaviour & loot — server profile `config.json`
+The main runtime config. **Editing loot or timers here needs only a server restart — no
+rebuild.** Copy `ServerProfile/FlareGunAirdropMod/config.json` to:
 ```
 <ServerProfileFolder>/FlareGunAirdropMod/config.json
 ```
-Edit loot tables, weights, and timing to taste.
+It's plain JSON. The shipped file documents every key with `_comment_*` entries (the game
+ignores unknown keys). Readable summary below — **JSON has no real comments, so don't put
+`//` in the actual file; use the `_comment_*` style the shipped file uses:**
+```jsonc
+{
+  "flare": {
+    "minTriggerPitch": 30.0,        // degrees above horizontal needed to trigger (flat / indoors = nothing)
+    "airdropSpawnHeight": 100.0,    // metres above the shooter the crate appears
+    "airdropDescentSpeed": 6.0,     // metres/second it descends
+    "airdropLifetime": 1800.0,      // seconds the landed crate stays (1800 = 30 min)
+    "airdropContainerClass": "FGAM_AirdropContainer",
+    "redZoneDelay": 300.0,          // Red flare: seconds before the gas zone appears
+    "redZoneDuration": 1500.0       // Red flare: seconds the zone + its crate last
+  },
+  "loot_GREEN": {                   // one block per colour - exact DayZ class names
+    "items": [ "KnifeHunting", "Hatchet", "Bandage", "Bandage", "TentDome" ]
+  }
+  // ...loot_RED / loot_BLUE / loot_WHITE / loot_YELLOW / loot_BLACK / loot_ORANGE
+}
+```
+Items that fit go inside the crate's cargo; overflow drops on the ground beside it.
 
-## Configuration reference (`config.json`)
-
-### `flare` section
 | Key | Default | Description |
 |-----|---------|-------------|
-| `shotsPerState` | `1` | Shots per health tier before degrading |
-| `minTriggerPitch` | `30.0` | Degrees above horizontal the gun must be aimed (at the shot) to trigger an event. Firing flat or into a roof does nothing. |
-| `airdropSpawnHeight` | `100.0` | Metres above the ground the crate spawns before descending |
-| `airdropDescentSpeed` | `6.0` | Metres/second the crate falls from the sky |
-| `airdropLifetime` | `1800.0` | Seconds the landed crate stays before it despawns (30 min) |
-| `airdropContainerClass` | `"FGAM_AirdropContainer"` | DayZ class of airdrop container (mod's big-cargo crate) |
-| `redZoneDelay` | `300.0` | Seconds before toxic zone activates (Red flare) |
-| `redZoneRadius` | `50.0` | Radius of toxic zone in metres |
-| `redZoneDuration` | `1500.0` | How long (seconds) the zone + crate last |
+| `minTriggerPitch` | `30.0` | Degrees above horizontal the gun must be aimed to trigger. Flat / indoors = nothing. |
+| `airdropSpawnHeight` | `100.0` | Metres above the shooter the crate spawns before descending |
+| `airdropDescentSpeed` | `6.0` | Metres/second the crate falls |
+| `airdropLifetime` | `1800.0` | Seconds the landed crate stays before despawn |
+| `airdropContainerClass` | `"FGAM_AirdropContainer"` | Container class used for airdrops |
+| `redZoneDelay` | `300.0` | Seconds before the Red toxic zone activates |
+| `redZoneDuration` | `1500.0` | Seconds the Red zone + its crate last |
+| `loot_<COLOUR>` | — | Items spawned in that colour's crate (exact class names) |
 
-### `loot_<COLOR>` sections
-Array of DayZ class name strings. Items are placed into the container; extras drop nearby.
+> Some keys exist but are **currently inert**, left from earlier iterations:
+> `shotsPerState`, `redZoneRadius`, `minTriggerAltitude`, `maxTriggerRadius`, and the
+> whole `spawnWeights` block. Editing them has no effect today.
 
-### `spawnWeights`
-Weighted probability maps for each spawn location type (`helicrash`, `train`, `beach`).
-Beach spawns only produce nearly-destroyed guns (1 shot left).
+### 4. (Optional) Test gear — give every player flares on spawn
+Handy while testing. In the mission's `init.c`, inside `StartingEquipSetup(...)`:
+```c
+player.GetInventory().CreateInInventory("FlareGun");
+player.GetInventory().CreateInInventory("FGAM_Mag_Red");
+player.GetInventory().CreateInInventory("FGAM_Mag_Green");
+// ...add whichever colours you want to test
+```
+Remove these lines for normal play so flares are found in the world instead.
 
-## Flare gun spawn locations
-
-| Location | Condition | Notes |
-|----------|-----------|-------|
-| Helicrash | Normal CE condition | Spawns with random colored magazine (weighted) |
-| Train / railway | Normal CE condition | More tactical/supply-oriented weights |
-| Wrecked boats (beach) | Badly Damaged (1 shot) | Survival-focused colors only |
-| Standalone magazine | Normal | Any color can spawn separately as loot |
+### What you can't change without rebuilding the PBO
+These live in `config.cpp` / the particle files **inside** the mod, so changing them means
+a rebuild (`1_copy_to_P.bat` → `2_deploy.bat`): the flare classes & names, the
+`cfgAmmoTypes` registry, flight ballistics (rise / fall / burn time on
+`FGAM_Bullet_FlareBase`), the crate's cargo grid size, and the flame/smoke `.ptc` particles.
 
 ## File structure
 
 ```
 FlareGunAirdropMod/
-├── config.cpp                          — mod definition, ammo/magazine/weapon classes
+├── config.cpp                          — mod definition: ammo/magazine/weapon classes, cfgAmmoTypes
 ├── mod.cpp                             — Steam Workshop metadata
+├── cfgeconomycore.xml                  — EXAMPLE mission CE file (shows the <ce> entry to copy)
+├── ADDING_FLARES.md                    — guide: new colour + crate loot + spawn locations
+├── 1_copy_to_P.bat / 2_deploy.bat      — build (pack + sign) / deploy to server + client
 ├── FlareGunAirdropMod/
-│   └── scripts/
-│       ├── 4_World/
-│       │   ├── FGAM_Config.c           — JSON config loader + defaults
-│       │   ├── FGAM_AirdropManager.c   — event dispatcher (falling crate + toxic gas + despawn)
-│       │   ├── FGAM_FlareGun.c         — server-side airdrop trigger (Weapon_Base.EEFired)
-│       │   ├── FGAM_FlareVisuals.c     — coloured flare light + smoke trail (client visuals)
-│       │   ├── FGAM_Magazines.c        — magazine script-class bindings
-│       │   ├── FGAM_ToxicArea.c        — toxic gas zone for the red flare
-│       │   ├── FGAM_AirdropContainer.c — airdrop crate class
-│       │   └── FGAM_SpawnHandler.c     — spawn-context helpers (heli/train/beach weights)
-│       └── 5_Mission/
-│           └── FGAM_StartingEquip.c    — test starting gear (flares for all colours)
+│   ├── scripts/
+│   │   ├── 3_Game/
+│   │   │   └── FGAM_Particles.c        — registers the 7 coloured flare particles
+│   │   ├── 4_World/
+│   │   │   ├── FGAM_Config.c           — JSON config loader + defaults
+│   │   │   ├── FGAM_AirdropManager.c   — event dispatcher (falling crate + toxic gas + despawn)
+│   │   │   ├── FGAM_FlareGun.c         — server-side airdrop trigger (Weapon_Base.EEFired)
+│   │   │   ├── FGAM_FlareVisuals.c     — coloured flare light + smoke (client visuals)
+│   │   │   ├── FGAM_Magazines.c        — magazine script-class bindings
+│   │   │   ├── FGAM_ToxicArea.c        — toxic gas zone for the red flare
+│   │   │   ├── FGAM_AirdropContainer.c — airdrop crate class
+│   │   │   └── FGAM_SpawnHandler.c     — spawn-context helpers (dormant; not wired up)
+│   │   └── 5_Mission/
+│   │       └── FGAM_StartingEquip.c    — placeholder (test gear lives in mission init.c)
+│   └── Graphics/
+│       └── Particles/                  — our own recoloured flare .ptc files (7 colours)
 ├── db/
-│   ├── FGAM_types.xml                   — CE types for gun + all 7 magazine colors
-│   └── cfgeconomycore.xml              — tells CE to load FGAM_types.xml separately
+│   └── FGAM_types.xml                   — CE spawn rules for the gun + all 7 flare magazines
 └── ServerProfile/
     └── FlareGunAirdropMod/
-        └── config.json                 — editable server config (loot, weights, timing)
+        └── config.json                 — runtime config (loot, timers, trigger pitch)
 ```

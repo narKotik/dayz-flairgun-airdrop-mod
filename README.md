@@ -24,7 +24,9 @@ How it's built:
 > On a **dedicated** server the engine never runs the flare's visual simulation, so the
 > trigger lives in the weapon's server-side `OnFire`, not in the flare simulation.
 
-The full "add a new color" recipe is in the header of `FGAM_FlareVisuals.c`.
+**Adding a new flare colour** (plus its crate loot and where it spawns) is documented
+step-by-step in [ADDING_FLARES.md](ADDING_FLARES.md). A short version of the colour
+recipe is also in the header of `FGAM_FlareVisuals.c`.
 
 free, with credit). FGAM extends `Flaregun_Base.chamberableFrom` so it stays
 

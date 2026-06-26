@@ -24,12 +24,17 @@
         <value name="Tier3"/>
     </type>
 
-    <!-- ══ FLARE ROUNDS ═══════════════════════════════════════════════════════ -->
+    <!-- ══ FLARE ROUNDS ═══════════════════════════════════════════════════════
+         NOTE: min is 0 on purpose. The flare round model is awkward for CE to place
+         on surfaces (vanilla ships flares at nominal=0 for this reason). A non-zero
+         min FORCES CE to keep re-placing them every loop, which floods the log with
+         "is hard to place" / "exceeded max tests". min=0 lets CE fill toward nominal
+         opportunistically without the relentless retries; nominals kept modest. -->
     <type name="FGAM_Mag_Red">
-        <nominal>5</nominal>
+        <nominal>3</nominal>
         <lifetime>7200</lifetime>
         <restock>900</restock>
-        <min>2</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -41,10 +46,10 @@
     </type>
 
     <type name="FGAM_Mag_Green">
-        <nominal>6</nominal>
+        <nominal>3</nominal>
         <lifetime>7200</lifetime>
         <restock>900</restock>
-        <min>3</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -57,10 +62,10 @@
     </type>
 
     <type name="FGAM_Mag_Blue">
-        <nominal>5</nominal>
+        <nominal>3</nominal>
         <lifetime>7200</lifetime>
         <restock>900</restock>
-        <min>2</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -73,10 +78,10 @@
     </type>
 
     <type name="FGAM_Mag_White">
-        <nominal>6</nominal>
+        <nominal>3</nominal>
         <lifetime>7200</lifetime>
         <restock>900</restock>
-        <min>3</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -87,10 +92,10 @@
     </type>
 
     <type name="FGAM_Mag_Yellow">
-        <nominal>3</nominal>
+        <nominal>2</nominal>
         <lifetime>7200</lifetime>
         <restock>1800</restock>
-        <min>1</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -105,7 +110,7 @@
         <nominal>2</nominal>
         <lifetime>7200</lifetime>
         <restock>3600</restock>
-        <min>1</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
@@ -116,10 +121,10 @@
     </type>
 
     <type name="FGAM_Mag_Orange">
-        <nominal>4</nominal>
+        <nominal>3</nominal>
         <lifetime>7200</lifetime>
         <restock>1200</restock>
-        <min>2</min>
+        <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>

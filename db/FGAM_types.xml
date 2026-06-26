@@ -5,7 +5,11 @@
 -->
 <types>
 
-    <!-- ══ FLARE GUN ══════════════════════════════════════════════════════════ -->
+    <!-- ══ FLARE GUN ══════════════════════════════════════════════════════════
+         NOTE: name MUST be exactly "Flaregun" (lowercase g) - the vanilla class.
+         Vanilla ships it at nominal 0 (never world-spawned); this entry OVERRIDES
+         that so the gun actually appears. A wrong-case name (e.g. "FlareGun") fails
+         to override and the gun never spawns. -->
     <type name="Flaregun">
         <nominal>12</nominal>
         <lifetime>14400</lifetime>

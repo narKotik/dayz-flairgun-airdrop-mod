@@ -18,10 +18,10 @@ class FGAM_AirdropManager
 
         FGAM_Config cfg = FGAM_Config.Get();
 
-        // The "fired upward enough" gate already ran at fire time
-        // (Weapon_Base.FGAM_FiredUpward), so we only get here for valid shots.
+        // Called from the flare's simulation (FGAM_FlareVisuals.c) only after the
+        // flare actually rose into the sky, so we only get here for valid shots.
 
-        // Drop point: directly under where the flare was fired, at ground level.
+        // Drop point: directly under the flare, at ground level.
         vector groundPos = peakPos;
         groundPos[1] = GetGame().SurfaceY(peakPos[0], peakPos[2]);
 

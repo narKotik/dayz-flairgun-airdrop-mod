@@ -2,6 +2,32 @@
 
 Fire a colored flare into the sky — trigger a unique airdrop or zone event.
 
+## Flares & colors
+
+Each FGAM flare fires a **colored burning flare** — slow rise/fall, bright, with a
+colored smoke trail — and triggers its airdrop when it is **fired up into the open
+sky** (aiming flat or into a ceiling/roof does nothing). The *inventory cartridge*
+keeps the vanilla (white) flare model — that color is baked into the binarized model
+and can't be changed — so flares are told apart by name + airdrop.
+
+How it's built:
+
+- **Color / brightness** → `FGAM_FlareLight*` in `FGAM_FlareVisuals.c` (client visuals)
+- **Flame + smoke color** → particle ids in `FGAM_FlareSimulation_*` (client visuals)
+- **Rise / fall / burn time** → `FGAM_Bullet_FlareBase` ballistics in `config.cpp`
+- **Airdrop trigger** → `Weapon_Base.OnFire` in `FGAM_FlareGun.c` (server-side; reads
+  the fired ammo's color, gated by aim pitch + roof check)
+- **Ammo registry** → `cfgAmmoTypes` in `config.cpp` (mandatory — every flare cartridge
+  must be registered or chambering crashes the game)
+- **Aim gate** → `minTriggerPitch` in `config.json`
+
+> On a **dedicated** server the engine never runs the flare's visual simulation, so the
+> trigger lives in the weapon's server-side `OnFire`, not in the flare simulation.
+
+The full "add a new color" recipe is in the header of `FGAM_FlareVisuals.c`.
+
+free, with credit). FGAM extends `Flaregun_Base.chamberableFrom` so it stays
+
 ## Color → Event
 
 | Color  | Event |
@@ -47,7 +73,7 @@ Edit loot tables, weights, and timing to taste.
 | Key | Default | Description |
 |-----|---------|-------------|
 | `shotsPerState` | `1` | Shots per health tier before degrading |
-| `minTriggerAltitude` | `50.0` | Metres above terrain required to trigger event |
+| `minTriggerPitch` | `30.0` | Degrees above horizontal the gun must be aimed (at the shot) to trigger an event. Firing flat or into a roof does nothing. |
 | `airdropSpawnHeight` | `100.0` | Metres above the ground the crate spawns before descending |
 | `airdropDescentSpeed` | `6.0` | Metres/second the crate falls from the sky |
 | `airdropLifetime` | `1800.0` | Seconds the landed crate stays before it despawns (30 min) |
@@ -80,13 +106,17 @@ FlareGunAirdropMod/
 ├── mod.cpp                             — Steam Workshop metadata
 ├── FlareGunAirdropMod/
 │   └── scripts/
-│       └── 4_World/
-│           ├── FGAM_Config.c           — JSON config loader + defaults
-│           ├── FGAM_AirdropManager.c   — event dispatcher (falling crate + toxic gas + despawn)
-│           ├── FGAM_FlareProjectile.c  — fires the airdrop event after delay
-│           ├── FGAM_FlareGun.c         — condition degradation per shot
-│           ├── FGAM_Magazines.c        — per-colour magazines + colour detection
-│           └── FGAM_SpawnHandler.c     — spawn-context helpers (heli/train/beach weights)
+│       ├── 4_World/
+│       │   ├── FGAM_Config.c           — JSON config loader + defaults
+│       │   ├── FGAM_AirdropManager.c   — event dispatcher (falling crate + toxic gas + despawn)
+│       │   ├── FGAM_FlareGun.c         — server-side airdrop trigger (Weapon_Base.EEFired)
+│       │   ├── FGAM_FlareVisuals.c     — coloured flare light + smoke trail (client visuals)
+│       │   ├── FGAM_Magazines.c        — magazine script-class bindings
+│       │   ├── FGAM_ToxicArea.c        — toxic gas zone for the red flare
+│       │   ├── FGAM_AirdropContainer.c — airdrop crate class
+│       │   └── FGAM_SpawnHandler.c     — spawn-context helpers (heli/train/beach weights)
+│       └── 5_Mission/
+│           └── FGAM_StartingEquip.c    — test starting gear (flares for all colours)
 ├── db/
 │   ├── FGAM_types.xml                   — CE types for gun + all 7 magazine colors
 │   └── cfgeconomycore.xml              — tells CE to load FGAM_types.xml separately

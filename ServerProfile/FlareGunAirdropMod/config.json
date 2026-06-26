@@ -5,8 +5,11 @@
         "_comment_shotsPerState": "Shots before the gun drops one health tier (1-3 recommended)",
         "shotsPerState": 2,
 
-        "_comment_minTriggerPitch": "Minimum angle above horizontal (degrees) the flare must be fired to trigger the event. Firing flat/parallel to the ground does nothing. 0 = trigger from any angle.",
+        "_comment_minTriggerPitch": "Degrees above horizontal the flare gun must be aimed (read server-side at the shot) to trigger an airdrop. Firing flat or into a ceiling/roof does nothing. 0 = horizontal, 90 = straight up.",
         "minTriggerPitch": 30.0,
+
+        "_comment_minTriggerAltitude": "(legacy, unused) was used by the old flare-altitude trigger.",
+        "minTriggerAltitude": 40.0,
 
         "_comment_maxTriggerRadius": "Max horizontal distance (metres) from shooter to count as a valid signal",
         "maxTriggerRadius": 1500.0,

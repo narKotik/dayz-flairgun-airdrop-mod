@@ -5,7 +5,8 @@ class FGAM_FlareConfig
 {
     int    shotsPerState         = 1;
     bool   canBeRepaired         = false;
-    float  minTriggerPitch       = 30.0;   // degrees above horizontal the flare must be fired
+    float  minTriggerPitch       = 30.0;   // degrees above horizontal the gun must be aimed to trigger
+    float  minTriggerAltitude    = 40.0;   // (legacy/unused) metres the burning flare must reach
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;     // metres/second the crate falls
@@ -77,6 +78,8 @@ class FGAM_Config
             FlareSettings.shotsPerState          = root.flare.shotsPerState;
             if (root.flare.minTriggerPitch > 0)
                 FlareSettings.minTriggerPitch    = root.flare.minTriggerPitch;
+            if (root.flare.minTriggerAltitude > 0)
+                FlareSettings.minTriggerAltitude = root.flare.minTriggerAltitude;
             FlareSettings.maxTriggerRadius       = root.flare.maxTriggerRadius;
             FlareSettings.airdropSpawnHeight     = root.flare.airdropSpawnHeight;
             if (root.flare.airdropDescentSpeed > 0)
@@ -232,6 +235,7 @@ class FGAM_JsonFlareSettings
 {
     int    shotsPerState         = 1;
     float  minTriggerPitch       = 30.0;
+    float  minTriggerAltitude    = 40.0;
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;

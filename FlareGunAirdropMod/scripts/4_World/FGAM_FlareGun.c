@@ -1,112 +1,103 @@
-// FGAM_FlareGun
+// FGAM_FlareGun - server-side airdrop trigger.
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_FlareGun.c
+//
+// The coloured visuals live in FGAM_FlareVisuals.c (a client-side FlareSimulation).
+// The AIRDROP, however, must be triggered on the SERVER - and on a dedicated server
+// the engine never instantiates the flare's visual FlareSimulation (no lights/particles
+// are needed server-side), so a trigger placed there never runs. The weapon's OnFire
+// DOES run server-side, so that is where we trigger from.
+//
+// We read the chambered FGAM cartridge to know the colour (our own ammo classes make
+// this reliable - no colour-tracking hacks needed), and only fire the event if the
+// flare was actually launched into the sky: aimed up far enough AND no roof overhead,
+// so shooting flat or into a ceiling indoors does nothing.
+//
+// This does NOT degrade the gun or touch storage hooks (those caused problems before);
+// it is purely the airdrop trigger.
 
 modded class Weapon_Base
 {
-    private int m_FGAM_ShotsInState = 0;
-
-    override void OnFire(int muzzle_index)
+    // EEFired is the engine's fire callback. It runs on the dedicated server (vanilla
+    // guards only its CLIENT effects with !IsDedicatedServer) and gives us the fired
+    // round's CfgAmmo class directly - unlike GetChamberAmmoTypeName, which returns the
+    // colour-blind spawnPileType ("Ammo_Flare") and was why detection silently failed.
+    override void EEFired(int muzzleType, int mode, string ammoType)
     {
-        string chamberName = "";
-        if (GetGame().IsServer() && GetType() == "Flaregun")
-        {
-            chamberName = GetChamberAmmoTypeName(GetCurrentMuzzle());
-            Print("[FGAM] PRE-SUPER GetChamberAmmoTypeName='" + chamberName + "'");
-        }
-
-        super.OnFire(muzzle_index);
+        super.EEFired(muzzleType, mode, ammoType);
 
         if (!GetGame().IsServer()) return;
-        if (GetType() != "Flaregun") return;
 
-        // ColorTracker is set by EEItemLocationChanged when a mag leaves cargo (oldType=3)
-        string trackerColor = FGAM_ColorTracker.Consume();
-        Print("[FGAM] POST-SUPER chamberName='" + chamberName + "' trackerColor='" + trackerColor + "'");
+        string color = FGAM_ColorFromAmmo(ammoType);
+        if (color == "") return; // not one of our flares - ignore vanilla/other mods
 
-        string color = trackerColor;
-        if (color == "")
+        if (!FGAM_FiredUpward())
         {
-            // Fallback: derive color from chamberName (works for RED, may be wrong for others)
-            chamberName.ToLower();
-            if      (chamberName.Contains("_orange")) color = "ORANGE";
-            else if (chamberName.Contains("_red"))    color = "RED";
-            else if (chamberName.Contains("_green"))  color = "GREEN";
-            else if (chamberName.Contains("_black"))  color = "BLACK";
-            else if (chamberName.Contains("_blue"))   color = "BLUE";
-            else if (chamberName.Contains("_yellow")) color = "YELLOW";
-            else if (chamberName.Contains("_white"))  color = "WHITE";
+            Print("[FGAM] " + color + " flare not launched into the sky - no airdrop");
+            return;
         }
 
-        Print("[FGAM] OnFire final color='" + color + "'");
-
-        if (color != "")
-        {
-            if (FGAM_FiredUpward())
-            {
-                FGAM_FlareTracker tracker = new FGAM_FlareTracker(color, GetPosition());
-            }
-            else
-            {
-                Print("[FGAM] Flare not fired upward enough - event suppressed");
-            }
-        }
-
-        m_FGAM_ShotsInState = m_FGAM_ShotsInState + 1;
-        int shotsNeeded = FGAM_Config.Get().FlareSettings.shotsPerState;
-        if (shotsNeeded < 1) shotsNeeded = 1;
-        if (m_FGAM_ShotsInState >= shotsNeeded)
-        {
-            m_FGAM_ShotsInState = 0;
-            FGAM_DegradeCondition();
-        }
+        vector dropPos = FGAM_DropPosition();
+        Print("[FGAM] " + color + " flare launched - airdrop at " + dropPos);
+        FGAM_AirdropManager.Get().OnFlareEvent(color, dropPos, dropPos);
     }
 
-    // True only if the flare was actually fired up into the sky. We read the
-    // player's real up/down aiming angle from the weapon command (the same value
-    // the vanilla throwing/firing code uses, valid server-side) and require it to
-    // exceed minTriggerPitch degrees above horizontal. This replaces the old code
-    // that just ASSUMED the flare rose 80m every time, so firing parallel to the
-    // ground no longer triggers an event.
-    private bool FGAM_FiredUpward()
+    // Map our cartridge ammo class to a colour key. Only FGAM ammo matches, so
+    // vanilla and other mods' flares are ignored (they won't trigger airdrops).
+    protected string FGAM_ColorFromAmmo(string ammoName)
+    {
+        ammoName.ToLower();
+        if (!ammoName.Contains("fgam_bullet_flare")) return "";
+        if (ammoName.Contains("red"))    return "RED";
+        if (ammoName.Contains("green"))  return "GREEN";
+        if (ammoName.Contains("blue"))   return "BLUE";
+        if (ammoName.Contains("yellow")) return "YELLOW";
+        if (ammoName.Contains("white"))  return "WHITE";
+        if (ammoName.Contains("orange")) return "ORANGE";
+        if (ammoName.Contains("black"))  return "BLACK";
+        return "";
+    }
+
+    // Ground point near the shooter, nudged a few metres aside so the descending
+    // crate does not land on the player's head.
+    protected vector FGAM_DropPosition()
+    {
+        vector origin = GetPosition();
+        PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
+        if (player) origin = player.GetPosition();
+
+        float ang = Math.RandomFloat(0, Math.PI2);
+        float r   = Math.RandomFloat(5.0, 9.0);
+        origin[0] = origin[0] + Math.Cos(ang) * r;
+        origin[2] = origin[2] + Math.Sin(ang) * r;
+        return origin;
+    }
+
+    // True only if the flare was actually fired up into the open sky. We read the
+    // shooter's real up/down aiming angle (valid server-side) and require it to be
+    // above minTriggerPitch degrees, and that there is no roof/ceiling overhead.
+    protected bool FGAM_FiredUpward()
     {
         PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
-        if (!player) return true; // can't determine the shooter - don't block
+        if (!player) return true; // can't determine shooter - don't block
 
         HumanCommandWeapons hcw = player.GetCommandModifier_Weapons();
         if (!hcw) return true;
 
-        float udAngle  = hcw.GetBaseAimingAngleUD(); // degrees, positive = aiming up
+        float udAngle  = hcw.GetBaseAimingAngleUD(); // degrees, positive = up
         float minPitch = FGAM_Config.Get().FlareSettings.minTriggerPitch;
-
         if (udAngle < minPitch)
         {
-            Print("[FGAM] aim up/down angle=" + udAngle + " deg < " + minPitch + " - too low, suppressed");
+            Print("[FGAM] aim pitch " + udAngle + " deg < " + minPitch + " - too low, suppressed");
             return false;
         }
 
-        // Aimed up is not enough if there's a roof/ceiling overhead - the flare
-        // would just bump it and never reach the sky. Cast straight up and bail
-        // if the shooter is under cover (indoors / under a roof).
         if (MiscGameplayFunctions.IsUnderRoofEx(player, GameConstants.ROOF_CHECK_RAYCAST_DIST, ObjIntersectFire))
         {
             Print("[FGAM] under a roof - flare blocked overhead, suppressed");
             return false;
         }
 
-        Print("[FGAM] valid sky shot: angle=" + udAngle + " deg, overhead clear");
+        Print("[FGAM] valid sky shot: aim pitch=" + udAngle + " deg, overhead clear");
         return true;
-    }
-
-    private void FGAM_DegradeCondition()
-    {
-        float h = GetHealth01("", "Health");
-        float next;
-        if (h > 0.75)       next = 0.75;
-        else if (h > 0.50)  next = 0.50;
-        else if (h > 0.25)  next = 0.25;
-        else if (h > 0.0)   next = 0.0;
-        else                return;
-        SetHealth("", "Health", GetMaxHealth("", "") * next);
-        Print("[FGAM] FlareGun degraded, health now " + (next * 100) + "%");
     }
 }

@@ -9,6 +9,7 @@ class CfgPatches
         {
             "DZ_Data",
             "DZ_Weapons_Firearms",
+            "DZ_Weapons_Magazines",
             "DZ_Weapons_Projectiles",
             "DZ_Weapons_Ammunition",
             "DZ_Gear_Camping"
@@ -93,148 +94,177 @@ class CfgVehicles
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// Coloured flare cartridges.
+// FGAM coloured flares. All use the base (white) flare cartridge MODEL in the
+// inventory (the cartridge colour is baked into vanilla models and can't change),
+// but each fires a COLOURED burning flare - slow, bright, coloured smoke - and
+// triggers its airdrop. See FGAM_FlareVisuals.c for the colour/recipe and
+// open flare pack (used per their licence, with credit).
 //
-// Colour is applied ONLY through the DamageSystem healthLevels rvmat — the exact
-// mechanism vanilla uses for its own Red/Green/Blue/Yellow flares — so the round
-// keeps the stock flare model, ammo and chambering behaviour intact.
-//
-// IMPORTANT: do NOT override `ammo` here with a custom CfgAmmo class. The flare
-// gun's chambering FSM (WeaponChambering.ShowBullet -> GetCartridgeAtIndex) does
-// a native cartridge lookup the instant a round is chambered; pointing a flare at
-// a custom Bullet_* class makes that native call read invalid memory and hard-
-// crashes the client. The in-air trace therefore inherits from the closest
-// vanilla flare colour.
+// TUNE FLIGHT in FGAM_Bullet_FlareBase below: initSpeed/coefGravity = rise/fall,
+// timeToLive = burn seconds.
 // ──────────────────────────────────────────────────────────────────────────
+class CfgAmmo
+{
+    class Bullet_Flare;
+
+    class FGAM_Bullet_FlareBase : Bullet_Flare
+    {
+        scope = 1;
+        model = "\dz\weapons\projectiles\Flare_Projectile.p3d";
+        proxyShape = "\dz\weapons\projectiles\Flare_SingleRound.p3d";
+        casing = "FxCartridge_Flare";
+        round = "FxRound_Flare";
+        spawnPileType = "Ammo_Flare";
+        caliber = 0;
+        airFriction = -0.002;
+        airFrictionChangeOnActivation = -0.029;
+        typicalSpeed = 25;
+        initSpeed = 25;
+        weight = 0.005;
+        coefGravity = 0.009;
+        soundFly[] = {};
+        supersonicCrackNear[] = {};
+        supersonicCrackFar[] = {};
+        hit = 5;
+        indirectHit = 2;
+        indirectHitRange = 0.2;
+        simulation = "shotIlluminating";
+        simulationStep = 0.05;
+        soundHit[] = {"", 0, 1};
+        SimulationScriptClass = "FGAM_FlareSimulation_Yellow";
+        timeToLive = 180;
+        explosionTime = 180;
+        radius = 300;
+        class DamageApplied
+        {
+            type = "Projectile";
+            dispersion = 0;
+            bleedThreshold = 0;
+            defaultDamageOverride[] = {{0.5, 1}};
+            class Health { damage = 10; };
+            class Blood { damage = 10; };
+            class Shock { damage = 50; };
+        };
+    };
+
+    class FGAM_Bullet_FlareRed    : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Red"; };
+    class FGAM_Bullet_FlareGreen  : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Green"; };
+    class FGAM_Bullet_FlareBlue   : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Blue"; };
+    class FGAM_Bullet_FlareYellow : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Yellow"; };
+    class FGAM_Bullet_FlareWhite  : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_White"; };
+    class FGAM_Bullet_FlareOrange : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Orange"; };
+    class FGAM_Bullet_FlareBlack  : FGAM_Bullet_FlareBase { SimulationScriptClass = "FGAM_FlareSimulation_Black"; };
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// AMMO-TYPE REGISTRY — the piece whose absence crashed chambering.
+// Every cartridge ammo that a magazine can hold MUST be registered here so the
+// engine can map the ammo class to an internal integer type-id. When a flare is
+// chambered, WeaponChambering.ShowBullet calls Magazine.GetCartridgeAtIndex,
+// which reads that id; if the cartridge's ammo is unregistered the lookup is
+// invalid and the engine access-violates (crash at GetCartridgeAtIndex, 0x98).
+// ours didn't. One entry per ammo referenced by a magazine's `ammo=`.
+// ──────────────────────────────────────────────────────────────────────────
+class cfgAmmoTypes
+{
+    class AType_FGAM_Bullet_FlareRed    { name = "FGAM_Bullet_FlareRed"; };
+    class AType_FGAM_Bullet_FlareGreen  { name = "FGAM_Bullet_FlareGreen"; };
+    class AType_FGAM_Bullet_FlareBlue   { name = "FGAM_Bullet_FlareBlue"; };
+    class AType_FGAM_Bullet_FlareYellow { name = "FGAM_Bullet_FlareYellow"; };
+    class AType_FGAM_Bullet_FlareWhite  { name = "FGAM_Bullet_FlareWhite"; };
+    class AType_FGAM_Bullet_FlareOrange { name = "FGAM_Bullet_FlareOrange"; };
+    class AType_FGAM_Bullet_FlareBlack  { name = "FGAM_Bullet_FlareBlack"; };
+};
+
 class CfgMagazines
 {
     class Ammo_Flare;
-    class Ammo_FlareRed;
-    class Ammo_FlareGreen;
-    class Ammo_FlareBlue;
 
-    // Red — vanilla red model + red trace
-    class FGAM_Mag_Red : Ammo_FlareRed
+    // script-class binding to Ammunition_Base is in FGAM_Magazines.c.
+    class FGAM_Mag_FlareBase : Ammo_Flare
+    {
+        scope = 0;
+        model = "\dz\weapons\ammunition\Flare_SingleRound.p3d";
+        rotationFlags = 34;
+        weight = 80;
+        count = 5;
+        class DamageSystem
+        {
+            class GlobalHealth
+            {
+                class Health
+                {
+                    hitpoints = 100;
+                    healthLevels[] =
+                    {
+                        {1.0, {"DZ\weapons\pistols\flaregun\data\flaregun_yellow.rvmat"}},
+                        {0.7, {"DZ\weapons\pistols\flaregun\data\flaregun_yellow.rvmat"}},
+                        {0.5, {"DZ\weapons\pistols\flaregun\data\flaregun_yellow_damage.rvmat"}},
+                        {0.3, {"DZ\weapons\pistols\flaregun\data\flaregun_yellow_damage.rvmat"}},
+                        {0.0, {"DZ\weapons\pistols\flaregun\data\flaregun_yellow_destruct.rvmat"}}
+                    };
+                };
+            };
+        };
+    };
+
+    class FGAM_Mag_Red : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Red)";
         descriptionShort = "Toxic zone + military loot drop.";
-        weight = 80;
+        ammo = "FGAM_Bullet_FlareRed";
     };
-
-    // Green — vanilla green model + green trace
-    class FGAM_Mag_Green : Ammo_FlareGreen
+    class FGAM_Mag_Green : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Green)";
         descriptionShort = "Survival kit airdrop.";
-        weight = 80;
+        ammo = "FGAM_Bullet_FlareGreen";
     };
-
-    // Blue — vanilla blue model + blue trace
-    class FGAM_Mag_Blue : Ammo_FlareBlue
+    class FGAM_Mag_Blue : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Blue)";
         descriptionShort = "Medical airdrop.";
-        weight = 80;
+        ammo = "FGAM_Bullet_FlareBlue";
     };
-
-    // White — base flare recoloured white (base trace is white/yellow)
-    class FGAM_Mag_White : Ammo_Flare
-    {
-        scope = 2;
-        displayName = "Signal Flare (White)";
-        descriptionShort = "Food and water airdrop.";
-        weight = 80;
-        class DamageSystem
-        {
-            class GlobalHealth
-            {
-                class Health
-                {
-                    hitpoints = 100;
-                    healthLevels[] =
-                    {
-                        {1.0, {"FlareGunAirdropMod\data\flaregun_white.rvmat"}},
-                        {0.7, {"FlareGunAirdropMod\data\flaregun_white.rvmat"}},
-                        {0.5, {"FlareGunAirdropMod\data\flaregun_white_damage.rvmat"}},
-                        {0.3, {"FlareGunAirdropMod\data\flaregun_white_damage.rvmat"}},
-                        {0.0, {"FlareGunAirdropMod\data\flaregun_white_destruct.rvmat"}}
-                    };
-                };
-            };
-        };
-    };
-
-    // Yellow — base flare already uses the yellow rvmat; leave it as-is
-    class FGAM_Mag_Yellow : Ammo_Flare
+    class FGAM_Mag_Yellow : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Yellow)";
         descriptionShort = "CBRN protection airdrop.";
-        weight = 80;
+        ammo = "FGAM_Bullet_FlareYellow";
     };
-
-    // Orange — red model recoloured orange (trace inherits red — closest match)
-    class FGAM_Mag_Orange : Ammo_FlareRed
+    class FGAM_Mag_White : FGAM_Mag_FlareBase
+    {
+        scope = 2;
+        displayName = "Signal Flare (White)";
+        descriptionShort = "Food and water airdrop.";
+        ammo = "FGAM_Bullet_FlareWhite";
+    };
+    class FGAM_Mag_Orange : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Orange)";
         descriptionShort = "Construction and vehicle parts.";
-        weight = 80;
-        class DamageSystem
-        {
-            class GlobalHealth
-            {
-                class Health
-                {
-                    hitpoints = 100;
-                    healthLevels[] =
-                    {
-                        {1.0, {"FlareGunAirdropMod\data\flaregun_orange.rvmat"}},
-                        {0.7, {"FlareGunAirdropMod\data\flaregun_orange.rvmat"}},
-                        {0.5, {"FlareGunAirdropMod\data\flaregun_orange_damage.rvmat"}},
-                        {0.3, {"FlareGunAirdropMod\data\flaregun_orange_damage.rvmat"}},
-                        {0.0, {"FlareGunAirdropMod\data\flaregun_orange_destruct.rvmat"}}
-                    };
-                };
-            };
-        };
+        ammo = "FGAM_Bullet_FlareOrange";
     };
-
-    // Black / Dark — blue model recoloured dark (trace inherits blue)
-    class FGAM_Mag_Black : Ammo_FlareBlue
+    class FGAM_Mag_Black : FGAM_Mag_FlareBase
     {
         scope = 2;
         displayName = "Signal Flare (Dark)";
         descriptionShort = "Top-tier weapons cache.";
-        weight = 80;
-        class DamageSystem
-        {
-            class GlobalHealth
-            {
-                class Health
-                {
-                    hitpoints = 100;
-                    healthLevels[] =
-                    {
-                        {1.0, {"FlareGunAirdropMod\data\flaregun_dark.rvmat"}},
-                        {0.7, {"FlareGunAirdropMod\data\flaregun_dark.rvmat"}},
-                        {0.5, {"FlareGunAirdropMod\data\flaregun_dark_damage.rvmat"}},
-                        {0.3, {"FlareGunAirdropMod\data\flaregun_dark_damage.rvmat"}},
-                        {0.0, {"FlareGunAirdropMod\data\flaregun_dark_destruct.rvmat"}}
-                    };
-                };
-            };
-        };
+        ammo = "FGAM_Bullet_FlareBlack";
     };
 };
 
 class CfgWeapons
 {
-    class Flaregun_Base;
-    class Flaregun : Flaregun_Base
+    class Pistol_Base;
+    // Modify Flaregun_BASE (not the derived Flaregun) so this merges with other
+    // to the derived class shadows the inherited list and drops other mods' flares.
+    class Flaregun_Base : Pistol_Base
     {
         chamberableFrom[] += {
             "FGAM_Mag_Red", "FGAM_Mag_Green", "FGAM_Mag_Blue",

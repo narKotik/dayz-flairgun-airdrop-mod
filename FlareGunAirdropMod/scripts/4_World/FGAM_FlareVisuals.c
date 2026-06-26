@@ -17,7 +17,8 @@
 //
 // -- HOW TO ADD A NEW COLOUR (recipe) -----------------------------------------
 //   1. FlareGunAirdropMod/Graphics/Particles/fgam_flare_<name>.ptc
-//        Recolour from an existing one: change the "Color { t R G B ... }" arrays.
+//        Easiest: run  make_flare.bat <name> <R> <G> <B>   (e.g. make_flare.bat purple 0.6 0.1 1)
+//        Manual: recolour an existing one - change the "Color { t R G B ... }" arrays.
 //   2. FGAM_Particles.c : register it -> ParticleList.FGAM_FLARE_<NAME>
 //   3. FGAM_FlareLight<Name> below : SetAmbientColor/SetDiffuseColor (the light)
 //   4. FGAM_FlareSimulation_<Name> below : m_ScriptedLight + m_ParticleId

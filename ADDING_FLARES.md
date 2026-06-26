@@ -21,20 +21,33 @@ There are 8 small edits. The recipe is also summarised in the header of
 `FlareGunAirdropMod/scripts/4_World/FGAM_FlareVisuals.c`.
 
 ### 1.1 Make the particle (the coloured flame + smoke)
-Copy an existing particle and recolour it. Particles live in
-`FlareGunAirdropMod/Graphics/Particles/`.
+Particles live in `FlareGunAirdropMod/Graphics/Particles/`.
 
-- Copy `fgam_flare_red.ptc` → `fgam_flare_purple.ptc`.
-- Open it and edit every `Color { ... }` block. The numbers are repeating groups of
-  four: **`time R G B`**. Keep each `time` value; change the `R G B` to your colour
-  (values 0–1, **dots not commas**). For purple, R G B = `0.6 0.1 1`.
-  Example line: `Color { 0 0.6 0.1 1   0.0506 0.6 0.1 1   ... }`
-- Smoke thickness/length: in the `smoke` emitter, `SizeMultiplier` = how big,
-  `BirthRate` = how dense, `LifeTime` = how long the trail lingers.
+**Easy way — use the generator.** Run `make_flare.bat` with a name and an R G B colour
+(channels 0–1, dots):
+```
+make_flare.bat purple 0.6 0.1 1
+```
+It writes `FlareGunAirdropMod/Graphics/Particles/fgam_flare_purple.ptc`, recoloured from
+an existing flare particle (all timing/smoke/emitter structure preserved, decimals
+forced to dots). It also prints the exact `RegisterParticle` line you need for step 1.2.
+More examples:
+```
+make_flare.bat cyan 0.1 0.9 1
+make_flare.bat pink 1 0.4 0.7
+```
+
+**Manual way (optional).** Copy `fgam_flare_red.ptc` → `fgam_flare_<name>.ptc` and edit
+every `Color { ... }` block by hand: the numbers are repeating groups of four —
+**`time R G B`** — keep each `time`, change the `R G B` (0–1, **dots not commas**).
+Example line: `Color { 0 0.6 0.1 1   0.0506 0.6 0.1 1   ... }`
+
+**Tweak the smoke** (either way): in the `smoke` emitter of the `.ptc`,
+`SizeMultiplier` = how big, `BirthRate` = how dense, `LifeTime` = how long the trail lingers.
 
 > A flame can only be as "white"/"dark"/etc. as the colour you put here — this file
-> *is* the flare's colour. (Vanilla has no runtime tinting, which is why we ship our
-> own `.ptc`.)
+> *is* the flare's colour. (The engine has no runtime particle tinting, which is why we
+> ship our own `.ptc` per colour.)
 
 ### 1.2 Register the particle — `scripts/3_Game/FGAM_Particles.c`
 ```c

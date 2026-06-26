@@ -186,6 +186,7 @@ FlareGunAirdropMod/
 ├── cfgeconomycore.xml                  — EXAMPLE mission CE file (shows the <ce> entry to copy)
 ├── ADDING_FLARES.md                    — guide: new colour + crate loot + spawn locations
 ├── 1_copy_to_P.bat / 2_deploy.bat      — build (pack + sign) / deploy to server + client
+├── make_flare.bat / make_flare.ps1     — generate a recoloured flare particle (.ptc)
 ├── FlareGunAirdropMod/
 │   ├── scripts/
 │   │   ├── 3_Game/

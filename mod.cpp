@@ -8,3 +8,4 @@ tooltipOwned = "Flare Gun Airdrop Mod — active";
 overview = "Fire colored flares into the sky to trigger unique airdrops and zone events. Each color = different supply crate or hazard.";
 action = "";
 author = "";
+credits = "Coloured flares, airdrops and toxic zones - all original work on vanilla DayZ assets.";

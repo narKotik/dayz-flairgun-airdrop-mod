@@ -17,11 +17,17 @@
          That is why there is no Flaregun <type> below - only the flare cartridges. -->
 
     <!-- ══ FLARE ROUNDS ═══════════════════════════════════════════════════════
-         NOTE: min is 0 on purpose. The flare round model is awkward for CE to place
-         on surfaces (vanilla ships flares at nominal=0 for this reason). A non-zero
-         min FORCES CE to keep re-placing them every loop, which floods the log with
-         "is hard to place" / "exceeded max tests". min=0 lets CE fill toward nominal
-         opportunistically without the relentless retries; nominals kept modest. -->
+         These spawn as CARGO inside containers (count_in_map="0" count_in_cargo="1"),
+         NOT as loose ground loot. The flare round model is awkward for CE to place on
+         surfaces (vanilla ships flares at nominal=0 for this reason); placing them on
+         the map floods the log with "is hard to place" / "exceeded max tests" and costs
+         CE performance. Spawning them as cargo skips surface placement entirely.
+         The host containers + drop chances are defined in the mission's
+         cfgspawnabletypes.xml (see db/FGAM_cfgspawnabletypes_cargo.xml for the snippet):
+           AmmoBox (Military)        -> Red, Yellow, Dark, Orange
+           FirstAidKit (Medic)       -> Blue
+           DryBag/ChildBag/CoyoteBag -> Green, White
+         nominal here caps how many exist across all cargo; min=0 (no forced respawn). -->
     <type name="FGAM_Mag_Red">
         <nominal>8</nominal>
         <lifetime>7200</lifetime>
@@ -30,7 +36,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Military"/>
         <value name="Tier2"/>
@@ -45,7 +51,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Hunting"/>
         <usage name="Civilian"/>
@@ -61,7 +67,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Medic"/>
         <value name="Tier1"/>
@@ -77,7 +83,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Civilian"/>
         <value name="Tier1"/>
@@ -91,7 +97,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Military"/>
         <value name="Tier3"/>
@@ -106,7 +112,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Military"/>
         <value name="Tier4"/>
@@ -120,7 +126,7 @@
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
         <usage name="Industrial"/>
         <value name="Tier1"/>

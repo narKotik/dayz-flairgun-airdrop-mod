@@ -83,30 +83,40 @@ local server + client.
 Central-economy setup, in your **mission** folder. Two files:
 
 **a) `mpmissions/<your.mission>/db/FGAM_types.xml`** — copy it from this repo's `db/`.
-It defines spawn rules for the flare gun + all 7 flare magazines. Example entry:
+It registers all 7 flare magazines. They spawn as **cargo inside containers**, not as
+loose ground loot — note `count_in_map="0" count_in_cargo="1"`:
 ```xml
 <type name="FGAM_Mag_Green">
-    <nominal>3</nominal>      <!-- target count present on the map at once -->
-    <lifetime>7200</lifetime> <!-- seconds an untouched one survives -->
-    <restock>900</restock>    <!-- seconds before depleted stock is topped up -->
-    <min>0</min>              <!-- 0 on purpose - see the note below -->
+    <nominal>8</nominal>      <!-- cap on how many exist (across all cargo) -->
+    <lifetime>7200</lifetime>
+    <restock>900</restock>
+    <min>0</min>
     <quantmin>-1</quantmin>
     <quantmax>-1</quantmax>
     <cost>100</cost>
-    <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+    <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
     <category name="weapons"/>
-    <usage name="Hunting"/>   <!-- WHICH buildings: Military/Police/Medic/Hunting/Civilian/Industrial -->
+    <usage name="Hunting"/>
     <usage name="Civilian"/>
-    <value name="Tier1"/>     <!-- WHICH map regions; omit <value> for everywhere -->
-    <value name="Tier2"/>
 </type>
 ```
-> **Why `min` is 0:** the flare round model is awkward for CE to place on surfaces
-> (vanilla ships flares at `nominal=0` for this reason). A non-zero `min` forces CE to
-> keep re-placing them every loop, flooding the server log with `is hard to place` /
-> `exceeded max tests`. With `min=0`, CE fills toward `nominal` opportunistically and the
-> spam stops. Adjust `usage` / `value` / `nominal` to change where and how often flares
-> appear — full detail in [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.
+> **Why cargo, not ground loot:** the flare round model is awkward for CE to place on
+> surfaces (vanilla ships flares at `nominal=0` for this reason). Forcing them onto the
+> map (`count_in_map="1"`) makes CE retry placement hundreds of times per item —
+> thousands of `is hard to place` / `exceeded max tests` log lines and real CE load.
+> Spawning them as **cargo** (`count_in_map="0" count_in_cargo="1"`) skips surface
+> placement entirely, so the spam is gone and they still appear as findable loot.
+
+**a2) The container hosts — `cfgspawnabletypes.xml`.** Cargo items need a host container to
+spawn inside. Add the `<cargo>` lines from [`db/FGAM_cfgspawnabletypes_cargo.xml`](db/FGAM_cfgspawnabletypes_cargo.xml)
+into the matching `<type>` blocks of your mission's **base** `cfgspawnabletypes.xml` (a
+separate file doesn't merge reliably). Default theme:
+> - **AmmoBox** (Military) → Red, Yellow, Dark, Orange *(no vanilla industrial container exists, so Orange rides with the military boxes)*
+> - **FirstAidKit** (Medic) → Blue
+> - **DryBag_Green / ChildBag_Green / CoyoteBag_Brown** (Civilian) → Green, White
+>
+> So you find flares by **opening those containers** at the matching locations. Tune the
+> `chance=""` per `<cargo>` line for rarity. See [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.
 
 > **The flare gun spawns via your base `types.xml`, not this file.** `Flaregun` is a
 > vanilla class already defined in the mission's `db/types.xml` at `nominal 0` (never

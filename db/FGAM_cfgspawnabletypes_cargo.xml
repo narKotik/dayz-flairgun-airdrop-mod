@@ -1,0 +1,40 @@
+<!--
+  FGAM flare cargo spawns.
+
+  The flare cartridges spawn as CARGO inside containers, not as loose ground loot
+  (their model is hard for CE to place on surfaces - see db/FGAM_types.xml). To enable
+  this, add the <cargo> lines below into the matching <type> blocks of your mission's
+  cfgspawnabletypes.xml (the base file - a separate file does NOT merge reliably, same
+  as types.xml). Each <cargo> rolls independently when the host container spawns.
+
+  Pair this with db/FGAM_types.xml, where each flare has count_in_map="0" count_in_cargo="1".
+
+  Host -> flares (theme):
+    AmmoBox      (Military)  -> Red, Yellow, Dark, Orange   (no vanilla industrial
+                                container exists, so Orange rides with the military boxes)
+    FirstAidKit  (Medic)     -> Blue
+    DryBag_Green / ChildBag_Green / CoyoteBag_Brown (Civilian) -> Green, White
+
+  Adjust chance="" to taste (probability that cargo item spawns when the host spawns).
+-->
+
+<!-- inside  <type name="AmmoBox"> -->
+<cargo chance="0.30"> <item name="FGAM_Mag_Red" /> </cargo>
+<cargo chance="0.22"> <item name="FGAM_Mag_Yellow" /> </cargo>
+<cargo chance="0.18"> <item name="FGAM_Mag_Black" /> </cargo>
+<cargo chance="0.22"> <item name="FGAM_Mag_Orange" /> </cargo>
+
+<!-- inside  <type name="FirstAidKit"> -->
+<cargo chance="0.30"> <item name="FGAM_Mag_Blue" /> </cargo>
+
+<!-- inside  <type name="DryBag_Green"> -->
+<cargo chance="0.25"> <item name="FGAM_Mag_Green" /> </cargo>
+<cargo chance="0.25"> <item name="FGAM_Mag_White" /> </cargo>
+
+<!-- inside  <type name="ChildBag_Green"> -->
+<cargo chance="0.22"> <item name="FGAM_Mag_Green" /> </cargo>
+<cargo chance="0.22"> <item name="FGAM_Mag_White" /> </cargo>
+
+<!-- inside  <type name="CoyoteBag_Brown"> -->
+<cargo chance="0.20"> <item name="FGAM_Mag_Green" /> </cargo>
+<cargo chance="0.20"> <item name="FGAM_Mag_White" /> </cargo>

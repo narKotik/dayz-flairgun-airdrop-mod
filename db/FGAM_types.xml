@@ -6,27 +6,15 @@
 <types>
 
     <!-- ══ FLARE GUN ══════════════════════════════════════════════════════════
-         NOTE: name MUST be exactly "Flaregun" (lowercase g) - the vanilla class.
-         Vanilla ships it at nominal 0 (never world-spawned); this entry OVERRIDES
-         that so the gun actually appears. A wrong-case name (e.g. "FlareGun") fails
-         to override and the gun never spawns. -->
-    <type name="Flaregun">
-        <nominal>12</nominal>
-        <lifetime>14400</lifetime>
-        <restock>1800</restock>
-        <min>2</min>
-        <quantmin>-1</quantmin>
-        <quantmax>-1</quantmax>
-        <cost>100</cost>
-        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
-        <!-- Spawn at heli crashes and military/train locations -->
-        <category name="weapons"/>
-        <usage name="Military"/>
-        <usage name="Police"/>
-        <value name="Tier1"/>
-        <value name="Tier2"/>
-        <value name="Tier3"/>
-    </type>
+         The flare gun is the VANILLA "Flaregun" class, which ships at nominal 0
+         (never world-spawned). You CANNOT enable it from this separate file - the
+         base mission db/types.xml already defines "Flaregun" and that definition
+         wins, so a duplicate here is ignored.
+         To make the gun spawn, edit the "Flaregun" entry in your mission's main
+         db/types.xml directly, e.g.:
+             <nominal>12</nominal>   <min>3</min>
+         (its vanilla usage already covers Military/Police/Medic/Firefighter/Coast).
+         That is why there is no Flaregun <type> below - only the flare cartridges. -->
 
     <!-- ══ FLARE ROUNDS ═══════════════════════════════════════════════════════
          NOTE: min is 0 on purpose. The flare round model is awkward for CE to place

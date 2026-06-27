@@ -108,10 +108,13 @@ It defines spawn rules for the flare gun + all 7 flare magazines. Example entry:
 > spam stops. Adjust `usage` / `value` / `nominal` to change where and how often flares
 > appear — full detail in [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.
 
-> **The flare gun entry MUST be named exactly `Flaregun`** (lowercase g — the vanilla
-> class). Vanilla sets `Flaregun` to `nominal 0` (never world-spawned), and this entry
-> *overrides* that. A wrong-case name like `FlareGun` silently fails to override, so the
-> vanilla `nominal 0` wins and **the gun never spawns anywhere.**
+> **The flare gun spawns via your base `types.xml`, not this file.** `Flaregun` is a
+> vanilla class already defined in the mission's `db/types.xml` at `nominal 0` (never
+> world-spawned). A duplicate `Flaregun` entry in a *separate* CE file does **not**
+> override it — the base definition wins. To make the gun spawn, **edit the `Flaregun`
+> entry in your mission's main `db/types.xml`** (e.g. `<nominal>12</nominal>`,
+> `<min>3</min>`); its vanilla `usage` already covers Military/Police/Medic/Firefighter/Coast.
+> That's why `FGAM_types.xml` contains only the flare cartridges, not the gun.
 
 > **No rebuild needed for any of this.** These are mission CE files, not the PBO —
 > edit `FGAM_types.xml`, restart the server, done. (For changes to take effect on an

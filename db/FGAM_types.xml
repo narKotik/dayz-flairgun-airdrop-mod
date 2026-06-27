@@ -24,9 +24,10 @@
          CE performance. Spawning them as cargo skips surface placement entirely.
          The host containers + drop chances are defined in the mission's
          cfgspawnabletypes.xml (see db/FGAM_cfgspawnabletypes_cargo.xml for the snippet):
-           AmmoBox (Military)        -> Red, Yellow, Dark, Orange
+           AmmoBox (Military)        -> Red, Yellow, Dark
            FirstAidKit (Medic)       -> Blue
            DryBag/ChildBag/CoyoteBag -> Green, White
+           Drivable car trunks       -> Orange
          nominal here caps how many exist across all cargo; min=0 (no forced respawn). -->
     <type name="FGAM_Mag_Red">
         <nominal>8</nominal>

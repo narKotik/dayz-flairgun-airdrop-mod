@@ -111,9 +111,10 @@ loose ground loot — note `count_in_map="0" count_in_cargo="1"`:
 spawn inside. Add the `<cargo>` lines from [`db/FGAM_cfgspawnabletypes_cargo.xml`](db/FGAM_cfgspawnabletypes_cargo.xml)
 into the matching `<type>` blocks of your mission's **base** `cfgspawnabletypes.xml` (a
 separate file doesn't merge reliably). Default theme:
-> - **AmmoBox** (Military) → Red, Yellow, Dark, Orange *(no vanilla industrial container exists, so Orange rides with the military boxes)*
+> - **AmmoBox** (Military) → Red, Yellow, Dark
 > - **FirstAidKit** (Medic) → Blue
 > - **DryBag_Green / ChildBag_Green / CoyoteBag_Brown** (Civilian) → Green, White
+> - **Drivable car trunks** (CivilianSedan / Hatchback_02 / OffroadHatchback / Sedan_02 / Truck_01_Covered + variants) → Orange *(the vehicle-parts flare)*
 >
 > So you find flares by **opening those containers** at the matching locations. Tune the
 > `chance=""` per `<cargo>` line for rarity. See [ADDING_FLARES.md](ADDING_FLARES.md) Part 3.

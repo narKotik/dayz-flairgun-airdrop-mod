@@ -3,7 +3,7 @@
 
 class FGAM_FlareConfig
 {
-    int    shotsPerState         = 2;
+    int    shotsPerState         = 1;
     bool   canBeRepaired         = false;
     float  minTriggerPitch       = 70.0;   // degrees above horizontal the gun must be aimed to trigger
     float  minTriggerAltitude    = 40.0;   // (legacy/unused) metres the burning flare must reach

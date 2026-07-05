@@ -11,127 +11,279 @@
          base mission db/types.xml already defines "Flaregun" and that definition
          wins, so a duplicate here is ignored.
          To make the gun spawn, edit the "Flaregun" entry in your mission's main
-         db/types.xml directly, e.g.:
-             <nominal>12</nominal>   <min>3</min>
-         (its vanilla usage already covers Military/Police/Medic/Firefighter/Coast).
-         That is why there is no Flaregun <type> below - only the flare cartridges. -->
+         db/types.xml directly. That is why there is no Flaregun <type> below -
+         only the flare ammo boxes/cartridges. -->
 
-    <!-- ══ FLARE ROUNDS ═══════════════════════════════════════════════════════
-         These spawn as CARGO inside containers (count_in_map="0" count_in_cargo="1"),
-         NOT as loose ground loot. The flare round model is awkward for CE to place on
-         surfaces (vanilla ships flares at nominal=0 for this reason); placing them on
-         the map floods the log with "is hard to place" / "exceeded max tests" and costs
-         CE performance. Spawning them as cargo skips surface placement entirely.
-         The host containers + drop chances are defined in the mission's
-         cfgspawnabletypes.xml (see db/FGAM_cfgspawnabletypes_cargo.xml for the snippet):
-           AmmoBox (Military)        -> Red, Yellow, Dark
-           FirstAidKit (Medic)       -> Blue
-           DryBag/ChildBag/CoyoteBag -> Green, White
-           Drivable car trunks       -> Orange
-         nominal here caps how many exist across all cargo; min=0 (no forced respawn). -->
-    <type name="FGAM_Mag_Red">
-        <nominal>8</nominal>
+    <!-- ══ TIERED FLARE GUNS ══════════════════════════════════════════════════
+         Three variants of the SAME gun (all inherit vanilla Flaregun via config).
+         They differ only by spawn CONDITION (db/FGAM_spawnabletypes.xml <damage>)
+         and loot tier (usage below). Combined with the per-shot wear, spawn
+         condition = number of shots before the gun is ruined:
+           Coast  -> Badly Damaged -> 1 use   (common, near spawn)
+           Mid    -> Worn          -> 3 uses  (industrial / police)
+           Mil    -> Pristine      -> 4 uses  (military, rarest)
+         nominal/min are PER class; the map total is their SUM (~12 here).
+         IMPORTANT: set the vanilla "Flaregun" to nominal 0 in the mission's base
+         db/types.xml so only these variants world-spawn. -->
+
+    <type name="FGAM_Flaregun_Coast">
+        <nominal>6</nominal>
+        <lifetime>14400</lifetime>
+        <restock>0</restock>
+        <min>3</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+    </type>
+
+    <type name="FGAM_Flaregun_Mid">
+        <nominal>4</nominal>
+        <lifetime>14400</lifetime>
+        <restock>0</restock>
+        <min>2</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Industrial"/>
+        <usage name="Police"/>
+    </type>
+
+    <type name="FGAM_Flaregun_Mil">
+        <nominal>2</nominal>
+        <lifetime>14400</lifetime>
+        <restock>0</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Military"/>
+    </type>
+
+    <!-- ══ FLARE AMMO BOXES ═══════════════════════════════════════════════════
+         Ground loot (count_in_map="1"). These replace the magazines as the
+         ground-spawn item - the magazines use vanilla's Flare_SingleRound.p3d,
+         a thin rod-shaped model CE can't reliably place on the ground (confirmed
+         via RPT "exceeded max tests" / "is hard to place"; the same reason
+         Bohemia ships Ammo_Flare/Ammo_FlareRed/Blue/Green at nominal=0). The box
+         uses the 00Buck_10RoundBox model instead (proven ground-spawnable - see
+         AmmoBox_12gaSlug_10Rnd) and unpacks (right-click "Unbox") into ONE
+         FGAM_Mag_<Color> pre-loaded with 3 rounds (config.cpp, CfgVehicles >
+         FGAM_Box_FlareBase's Resources block - native Box_Base unpack action,
+         no custom script). "usage" tags are OR'd together - a type matches ANY
+         point tagged with one of its listed usages, so stacking multiple usage
+         tags (mirrors vanilla Ammo_FlareRed/Blue/Green, which combine
+         Military+Police+Medic+Firefighter+Coast) is how you avoid CE "exceeded
+         max tests" starvation on a single narrow tag like Coast alone (only
+         ~10 valid weapons+Coast points on all of Chernarus).
+
+         Common tier (civilian): Green, Blue, White, Yellow, Orange
+           -> Coast + Village + Town (large pool, easy to find near spawn/coast towns)
+         Rare tier (military-grade): Red, Black
+           -> Military + Industrial (matches heli crash / convoy secondary="InfectedArmy"
+              and train wreck secondary="InfectedIndustrial" loot pools - no events.xml
+              edits needed, those events pull from the general tagged CE pool by proximity) -->
+
+    <type name="FGAM_Box_Red">
+        <nominal>2</nominal>
         <lifetime>7200</lifetime>
         <restock>900</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Military"/>
+    </type>
+
+    <type name="FGAM_Box_Green">
+        <nominal>4</nominal>
+        <lifetime>7200</lifetime>
+        <restock>900</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+    </type>
+
+    <type name="FGAM_Box_Blue">
+        <nominal>4</nominal>
+        <lifetime>7200</lifetime>
+        <restock>900</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+        <usage name="Medic"/>
+    </type>
+
+    <type name="FGAM_Box_White">
+        <nominal>4</nominal>
+        <lifetime>7200</lifetime>
+        <restock>900</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+    </type>
+
+    <type name="FGAM_Box_Yellow">
+        <nominal>3</nominal>
+        <lifetime>7200</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+    </type>
+
+    <type name="FGAM_Box_Black">
+        <nominal>3</nominal>
+        <lifetime>7200</lifetime>
+        <restock>3600</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Military"/>
+    </type>
+
+    <type name="FGAM_Box_Orange">
+        <nominal>4</nominal>
+        <lifetime>7200</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="weapons"/>
+        <usage name="Coast"/>
+        <usage name="Village"/>
+        <usage name="Town"/>
+        <usage name="Industrial"/>
+    </type>
+
+    <!-- ══ FLARE MAGAZINES ════════════════════════════════════════════════════
+         No longer ground/cargo loot - only obtainable by unpacking the matching
+         box above (native Box_Base unpack action creates them directly, bypassing
+         CE spawn entirely). Kept here (all counts 0) purely so CE recognises the
+         class; remove this block instead if your server prefers unregistered
+         types over a fully-zeroed entry, both are equivalent in-game. -->
+
+    <type name="FGAM_Mag_Red">
+        <nominal>0</nominal>
+        <lifetime>7200</lifetime>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Military"/>
-        <value name="Tier2"/>
-        <value name="Tier3"/>
     </type>
 
     <type name="FGAM_Mag_Green">
-        <nominal>8</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>900</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Hunting"/>
-        <usage name="Civilian"/>
-        <value name="Tier1"/>
-        <value name="Tier2"/>
     </type>
 
     <type name="FGAM_Mag_Blue">
-        <nominal>8</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>900</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Medic"/>
-        <value name="Tier1"/>
-        <value name="Tier2"/>
-        <value name="Tier3"/>
     </type>
 
     <type name="FGAM_Mag_White">
-        <nominal>8</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>900</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Civilian"/>
-        <value name="Tier1"/>
     </type>
 
     <type name="FGAM_Mag_Yellow">
-        <nominal>5</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>1800</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Military"/>
-        <value name="Tier3"/>
-        <value name="Tier4"/>
     </type>
 
     <type name="FGAM_Mag_Black">
-        <nominal>4</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>3600</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Military"/>
-        <value name="Tier4"/>
     </type>
 
     <type name="FGAM_Mag_Orange">
-        <nominal>6</nominal>
+        <nominal>0</nominal>
         <lifetime>7200</lifetime>
-        <restock>1200</restock>
+        <restock>0</restock>
         <min>0</min>
         <quantmin>-1</quantmin>
         <quantmax>-1</quantmax>
         <cost>100</cost>
-        <flags count_in_cargo="1" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0"/>
         <category name="weapons"/>
-        <usage name="Industrial"/>
-        <value name="Tier1"/>
-        <value name="Tier2"/>
     </type>
 
 </types>

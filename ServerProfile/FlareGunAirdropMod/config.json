@@ -3,7 +3,7 @@
 
     "flare": {
         "_comment_shotsPerState": "Shots before the gun drops one health tier (1-3 recommended)",
-        "shotsPerState": 2,
+        "shotsPerState": 1,
 
         "_comment_minTriggerPitch": "Degrees above horizontal the flare gun must be aimed (read server-side at the shot) to trigger an airdrop. Firing flat or into a ceiling/roof does nothing. 0 = horizontal, 90 = straight up.",
         "minTriggerPitch": 70.0,

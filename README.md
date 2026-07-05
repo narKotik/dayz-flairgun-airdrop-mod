@@ -2,9 +2,9 @@
 
 Fire a colored flare into the sky — trigger a unique airdrop or zone event.
 
-## Flare Gun Airdrop Mod (FGAM)
+## Installation
 
-How to install check INSTALL.md file
+See [INSTALL.md](INSTALL.md).
 
 ## Flares & colors
 

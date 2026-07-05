@@ -3,20 +3,20 @@
 
 class FGAM_FlareConfig
 {
-    int    shotsPerState         = 1;
+    int    shotsPerState         = 2;
     bool   canBeRepaired         = false;
-    float  minTriggerPitch       = 30.0;   // degrees above horizontal the gun must be aimed to trigger
+    float  minTriggerPitch       = 70.0;   // degrees above horizontal the gun must be aimed to trigger
     float  minTriggerAltitude    = 40.0;   // (legacy/unused) metres the burning flare must reach
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;     // metres/second the crate falls
-    float  airdropLifetime       = 1800.0;  // seconds before the crate despawns (30 min)
+    float  airdropLifetime       = 300.0;   // seconds before the crate despawns (5 min)
     bool   airdropDespawnEnabled = true;    // false = crate stays forever and becomes pickable
-    float  airdropMaxAgeDays     = 45.0;    // only used when airdropDespawnEnabled is false; 0 = never expire
+    float  airdropMaxAgeDays     = 5.0;     // only used when airdropDespawnEnabled is false; 0 = never expire
     string airdropContainerClass = "FGAM_AirdropContainer";
     float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;
-    float  redZoneDuration       = 1500.0;
+    float  redZoneDuration       = 300.0;
 
     ref map<string, int> helicrashFlareWeights;
     ref map<string, int> trainFlareWeights;
@@ -139,72 +139,167 @@ class FGAM_Config
     {
         TStringArray red = new TStringArray();
         red.Insert("AKM");
-        red.Insert("AKM");
-        red.Insert("Mag_AKM_30Rnd");
-        red.Insert("Mag_AKM_30Rnd");
-        red.Insert("HighCapacityVest");
-        red.Insert("BattleHelmet");
+        red.Insert("PSO6Optic");
+        red.Insert("AK_Suppressor");
+        red.Insert("AK_woodbttstck_black");
+        red.Insert("AK_railhndgrd_black");
+        red.Insert("Mag_AKM_Drum75Rnd");
+        red.Insert("Mag_AKM_Drum75Rnd");
+        red.Insert("BDUJacket");
+        red.Insert("BDUPants");
+        red.Insert("PlateCarrierVest_Camo");
         red.Insert("MilitaryBoots_Black");
+        red.Insert("TacticalGoggles");
+        red.Insert("MilitaryBelt");
+        red.Insert("NylonKnifeSheath");
+        red.Insert("PlateCarrierHolster_Camo");
+        red.Insert("Attack2Bag_Ttsko");
+        red.Insert("TacticalGloves_Black");
+        red.Insert("Mich2001Helmet");
         LootTables.Set("RED", red);
 
         TStringArray green = new TStringArray();
         green.Insert("KnifeHunting");
+        green.Insert("HipPack_Green");
         green.Insert("Hatchet");
+        green.Insert("CivilianBelt");
+        green.Insert("NylonKnifeSheath");
+        green.Insert("PlateCarrierHolster_Camo");
+        green.Insert("BallisticHelmet_Blue");
+        green.Insert("PressVest_Blue");
         green.Insert("Matchbox");
-        green.Insert("MedicalSupplies");
-        green.Insert("TentDome");
-        green.Insert("Bandage");
-        green.Insert("Splint");
+        green.Insert("HuntingKnife");
+        green.Insert("HuntingBag");
+        green.Insert("HuntingVest");
+        green.Insert("HuntingJacket_Brown");
+        green.Insert("HunterPants_Brown");
+        green.Insert("WorkingGloves_Brown");
+        green.Insert("MKII");
+        green.Insert("Mag_MKII_10Rnd");
+        green.Insert("UMP45");
+        green.Insert("Mag_UMP_25Rnd");
+        green.Insert("Mag_UMP_25Rnd");
+        green.Insert("PistolSuppressor");
+        green.Insert("BandageDressing");
+        green.Insert("BandageDressing");
+        green.Insert("Epinephrine");
         LootTables.Set("GREEN", green);
 
         TStringArray blue = new TStringArray();
-        blue.Insert("BloodBagKit_0Pos");
-        blue.Insert("BloodBagKit_ABPos");
+        blue.Insert("PurificationTablets");
+        blue.Insert("PainkillerTablets");
+        blue.Insert("VitaminBottle");
+        blue.Insert("IodineTincture");
+        blue.Insert("CharcoalTablets");
+        blue.Insert("SalineBagIV");
+        blue.Insert("SalineBagIV");
         blue.Insert("Epinephrine");
-        blue.Insert("SurgicalKit");
-        blue.Insert("Tetracycline");
+        blue.Insert("Epinephrine");
+        blue.Insert("WaterPurificationTablets");
+        blue.Insert("WaterPurificationTablets");
         blue.Insert("Morphine");
-        blue.Insert("Saline_500");
+        blue.Insert("Morphine");
+        blue.Insert("TetracyclineAntibiotics");
+        blue.Insert("TetracyclineAntibiotics");
+        blue.Insert("BandageDressing");
+        blue.Insert("BandageDressing");
+        blue.Insert("BandageDressing");
+        blue.Insert("AntiChemInjector");
+        blue.Insert("AntiChemInjector");
+        blue.Insert("ParamedicPants_Green");
+        blue.Insert("ParamedicJacket_Green");
+        blue.Insert("MedicalScrubsHat_Green");
+        blue.Insert("HipPack_Medical");
+        blue.Insert("PressVest_Blue");
+        blue.Insert("BallisticHelmet_Blue");
+        blue.Insert("CanvasBag_Medical");
+        blue.Insert("SurgicalGloves_Green");
         LootTables.Set("BLUE", blue);
 
         TStringArray white = new TStringArray();
-        white.Insert("ArmyRation");
-        white.Insert("Can_SardinesOpened");
-        white.Insert("Can_TunafishOpened");
+        white.Insert("DryBag_Green");
         white.Insert("Canteen");
+        white.Insert("Honey");
+        white.Insert("Honey");
+        white.Insert("Honey");
+        white.Insert("Honey");
+        white.Insert("SodaCan_Cola");
+        white.Insert("SodaCan_Sprite");
+        white.Insert("SodaCan_Pipsi");
+        white.Insert("SodaCan_Kvass");
+        white.Insert("Matchbox");
         white.Insert("WaterPurificationTablets");
-        white.Insert("Disinfectant_Spray");
+        white.Insert("WaterPurificationTablets");
+        white.Insert("VitaminBottle");
         LootTables.Set("WHITE", white);
 
         TStringArray yellow = new TStringArray();
-        yellow.Insert("NBC_Suit");
-        yellow.Insert("GasMask");
-        yellow.Insert("GasMaskFilter");
-        yellow.Insert("GasMaskFilter");
-        yellow.Insert("Antidote");
+        yellow.Insert("NBCJacketGray");
+        yellow.Insert("NBCHoodGray");
+        yellow.Insert("NBCGlovesGray");
+        yellow.Insert("NBCBootsGray");
+        yellow.Insert("NBCPantsGray");
+        yellow.Insert("AirborneMask");
+        yellow.Insert("Attack2Bag_Black");
+        yellow.Insert("AntiChemInjector");
+        yellow.Insert("AntiChemInjector");
+        yellow.Insert("GasMask_Filter");
+        yellow.Insert("GasMask_Filter");
+        yellow.Insert("GasMask_Filter");
         yellow.Insert("Epinephrine");
-        yellow.Insert("Iodine");
+        yellow.Insert("TireRepairKit");
+        yellow.Insert("IodineTincture");
         LootTables.Set("YELLOW", yellow);
 
         TStringArray black = new TStringArray();
+        black.Insert("AliceBag_Camo");
         black.Insert("M4A1");
-        black.Insert("M4A1");
-        black.Insert("Mag_STANAG_30Rnd");
-        black.Insert("Mag_STANAG_30Rnd");
-        black.Insert("Mag_STANAG_30Rnd");
+        black.Insert("M4_MPBttstck");
+        black.Insert("M4_RISHndgrd");
+        black.Insert("ACOGOptic_6x");
+        black.Insert("M4_Suppressor");
+        black.Insert("Mag_STANAG_60Rnd");
+        black.Insert("Mag_STANAG_60Rnd");
         black.Insert("PistolSuppressor");
         black.Insert("RifleButtstockM4");
+        black.Insert("RailgunGrip");
+        black.Insert("ACOG4xScopeOptic");
+        black.Insert("Glock19");
+        black.Insert("Mag_Glock_15Rnd");
+        black.Insert("Mag_Glock_15Rnd");
+        black.Insert("BulletproofVest_Press");
+        black.Insert("TacticalHelmet_Black");
         LootTables.Set("BLACK", black);
 
         TStringArray orange = new TStringArray();
+        orange.Insert("CarRadiator");
+        orange.Insert("CoyoteBag_Green");
+        orange.Insert("CarBattery");
+        orange.Insert("SparkPlug");
+        orange.Insert("TruckBattery");
+        orange.Insert("GlowPlug");
+        orange.Insert("ElectronicRepairKit");
+        orange.Insert("TireRepairKit");
         orange.Insert("Hammer");
+        orange.Insert("BarbedWire");
+        orange.Insert("BarbedWire");
+        orange.Insert("Wire");
         orange.Insert("Screwdriver");
         orange.Insert("Nails");
         orange.Insert("Nails");
         orange.Insert("Nails");
-        orange.Insert("BarbedWire");
-        orange.Insert("SparkPlug");
-        orange.Insert("CarBattery");
+        orange.Insert("Nails");
+        orange.Insert("Nails");
+        orange.Insert("Nails");
+        orange.Insert("EpoxyPutty");
+        orange.Insert("EpoxyPutty");
+        orange.Insert("EpoxyPutty");
+        orange.Insert("Pliers");
+        orange.Insert("PickAxe");
+        orange.Insert("WoodAxe");
+        orange.Insert("Hatchet");
+        orange.Insert("HandSaw");
+        orange.Insert("Shovel");
         LootTables.Set("ORANGE", orange);
 
         FlareSettings.helicrashFlareWeights.Set("RED", 20);
@@ -233,18 +328,18 @@ class FGAM_Config
 class FGAM_JsonFlareSettings
 {
     int    shotsPerState         = 1;
-    float  minTriggerPitch       = 30.0;
+    float  minTriggerPitch       = 70.0;
     float  minTriggerAltitude    = 40.0;
     float  maxTriggerRadius      = 1500.0;
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;
-    float  airdropLifetime       = 1800.0;
+    float  airdropLifetime       = 300.0;
     bool   airdropDespawnEnabled = true;
-    float  airdropMaxAgeDays     = 45.0;
+    float  airdropMaxAgeDays     = 5.0;
     string airdropContainerClass = "FGAM_AirdropContainer";
     float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;
-    float  redZoneDuration       = 1500.0;
+    float  redZoneDuration       = 300.0;
 };
 
 class FGAM_JsonLootTable

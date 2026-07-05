@@ -24,6 +24,10 @@ P:\
 .claude/
 CLAUDE.md
 
+# ── Local-only planning docs (kept locally, never committed) ──────────────────
+PUBLISHING.md
+SEPARATION_PLAN.md
+
 # ── OS junk ───────────────────────────────────────────────────────────────────
 Thumbs.db
 .DS_Store

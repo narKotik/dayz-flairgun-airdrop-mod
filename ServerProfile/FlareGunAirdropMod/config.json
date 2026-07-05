@@ -6,7 +6,7 @@
         "shotsPerState": 2,
 
         "_comment_minTriggerPitch": "Degrees above horizontal the flare gun must be aimed (read server-side at the shot) to trigger an airdrop. Firing flat or into a ceiling/roof does nothing. 0 = horizontal, 90 = straight up.",
-        "minTriggerPitch": 30.0,
+        "minTriggerPitch": 70.0,
 
         "_comment_minTriggerAltitude": "(legacy, unused) was used by the old flare-altitude trigger.",
         "minTriggerAltitude": 40.0,
@@ -20,8 +20,14 @@
         "_comment_airdropDescentSpeed": "How fast (metres/second) the crate falls from the sky",
         "airdropDescentSpeed": 6.0,
 
-        "_comment_airdropLifetime": "Seconds the landed crate stays in the world before it despawns (1800 = 30 min). Currently 300 = 5 min for testing.",
+        "_comment_airdropLifetime": "Seconds the landed crate stays in the world before it despawns (1800 = 30 min). Currently 300 = 5 min for testing. Ignored when airdropDespawnEnabled is false.",
         "airdropLifetime": 300.0,
+
+        "_comment_airdropDespawnEnabled": "true = crate despawns after airdropLifetime and cannot be picked up (default). false = crate never despawns on its own and becomes takeable/pickable - a player can loot it, drag it into their base, and store gear in it exactly like a normal SeaChest. The moment it's moved even slightly from where it landed, this mod stops tracking it completely: it's now a normal SeaChest for all purposes, and its fate (e.g. if the owner abandons the base) is entirely up to vanilla DayZ, not this mod. Only a crate that is NEVER moved - i.e. genuinely abandoned, nobody ever claimed it - gets cleaned up automatically, and only after airdropMaxAgeDays.",
+        "airdropDespawnEnabled": true,
+
+        "_comment_airdropMaxAgeDays": "Only used when airdropDespawnEnabled is false, and only for a crate that has never been moved from its drop spot. After this many in-game days of sitting untouched, it's treated as abandoned and removed. A crate that's been claimed/moved is never subject to this - see airdropDespawnEnabled. 0 = an untouched crate is also kept forever (no litter cleanup at all).",
+        "airdropMaxAgeDays": 5.0,
 
         "_comment_airdropContainerClass": "DayZ class name of the container used for airdrops (FGAM_AirdropContainer = big-cargo crate added by this mod)",
         "airdropContainerClass": "FGAM_AirdropContainer",
@@ -35,13 +41,24 @@
     "loot_RED": {
         "_comment": "Items spawned inside crate for RED flare. Use exact DayZ class names.",
         "items": [
-            "AKM", "AKM",
-            "Mag_AKM_30Rnd", "Mag_AKM_30Rnd", "Mag_AKM_30Rnd",
-            "HighCapacityVest",
-            "BattleHelmet",
+            "AKM",
+            "PSO6Optic",
+            "AK_Suppressor",
+            "AK_woodbttstck_black",
+            "AK_railhndgrd_black",
+            "Mag_AKM_Drum75Rnd", 
+			"Mag_AKM_Drum75Rnd",
+            "BDUJacket",
+            "BDUPants",
+            "PlateCarrierVest_Camo",
             "MilitaryBoots_Black",
-            "AssaultBag_Black",
-            "Chemlight_Red", "Chemlight_Red"
+            "TacticalGoggles",
+            "MilitaryBelt",
+            "NylonKnifeSheath",
+            "PlateCarrierHolster_Camo",
+            "Attack2Bag_Ttsko",
+            "TacticalGloves_Black",
+            "Mich2001Helmet"
         ]
     },
 
@@ -49,69 +66,101 @@
         "_comment": "Survival kit",
         "items": [
             "KnifeHunting",
+            "HipPack_Green",
             "Hatchet",
+            "CivilianBelt",
+            "NylonKnifeSheath",
+            "PlateCarrierHolster_Camo",
+            "BallisticHelmet_Blue",
+            "PressVest_Blue",
             "Matchbox",
-            "TentDome",
-            "Bandage", "Bandage", "Bandage",
-            "Splint",
-            "Epinephrine",
-            "WoodenStick", "WoodenStick",
-            "HunterJacket_Brown",
-            "HunterPants_Brown"
+			"HuntingKnife",
+			"HuntingBag",
+			"HuntingVest",
+            "HuntingJacket_Brown",
+            "HunterPants_Brown",
+            "WorkingGloves_Brown",
+            "MKII",
+            "Mag_MKII_10Rnd",
+            "UMP45",
+            "Mag_UMP_25Rnd",
+            "Mag_UMP_25Rnd",
+            "PistolSuppressor",
+			"BandageDressing", "BandageDressing", 
+            "Epinephrine"
         ]
     },
 
     "loot_BLUE": {
         "_comment": "Medical humanitarian drop",
         "items": [
-            "BloodBagKit_0Pos",
-            "BloodBagKit_ABPos",
-            "BloodBagKit_BPos",
-            "Epinephrine", "Epinephrine",
-            "SurgicalKit",
-            "Tetracycline", "Tetracycline",
-            "Morphine",
-            "Saline_500", "Saline_500",
-            "Bandage", "Bandage", "Bandage", "Bandage",
+            "PurificationTablets",
+            "PainkillerTablets",
+			"VitaminBottle",
+			"IodineTincture",
             "CharcoalTablets",
-            "Disinfectant_Spray"
+            "SalineBagIV", "SalineBagIV",
+            "Epinephrine", "Epinephrine",
+			"WaterPurificationTablets", "WaterPurificationTablets",
+            "Morphine", "Morphine",
+            "TetracyclineAntibiotics", "TetracyclineAntibiotics",
+            "BandageDressing", "BandageDressing", "BandageDressing",
+			"AntiChemInjector", "AntiChemInjector",
+            "ParamedicPants_Green",
+            "ParamedicJacket_Green",
+            "MedicalScrubsHat_Green",
+            "HipPack_Medical",
+            "PressVest_Blue",
+            "BallisticHelmet_Blue",
+            "CanvasBag_Medical",
+            "SurgicalGloves_Green"
         ]
     },
 
     "loot_WHITE": {
         "_comment": "Provisions / food drop",
         "items": [
-            "ArmyRation", "ArmyRation",
-            "Can_SardinesOpened", "Can_SardinesOpened",
-            "Can_TunafishOpened", "Can_TunafishOpened",
-            "Canteen", "Canteen",
+            "DryBag_Green",
+			"Canteen",
+			"Honey", "Honey", "Honey", "Honey",
+            "SodaCan_Cola",
+            "SodaCan_Sprite",
+            "SodaCan_Pipsi",
+            "SodaCan_Kvass",
+            "Matchbox",
             "WaterPurificationTablets", "WaterPurificationTablets",
-            "Disinfectant_Spray",
-            "Vitamins",
-            "SodaCan_Cola"
+            "VitaminBottle"
         ]
     },
 
     "loot_YELLOW": {
         "_comment": "CBRN / NBC protection kit",
         "items": [
-            "NBC_Suit",
-            "NBC_Hood",
-            "GasMask",
-            "GasMaskFilter", "GasMaskFilter", "GasMaskFilter",
-            "Antidote", "Antidote",
+            "NBCJacketGray",
+            "NBCHoodGray",
+            "NBCGlovesGray",
+            "NBCBootsGray",
+            "NBCPantsGray",
+            "AirborneMask",
+            "Attack2Bag_Black",
+            "AntiChemInjector", "AntiChemInjector",
+            "GasMask_Filter", "GasMask_Filter", "GasMask_Filter",
             "Epinephrine",
-            "Iodine",
-            "NBC_Boots",
-            "NBC_Gloves"
+			"TireRepairKit",
+            "IodineTincture"
         ]
     },
 
     "loot_BLACK": {
         "_comment": "Top-tier weapon cache. Black smoke only — no light.",
         "items": [
+			"AliceBag_Camo",
             "M4A1",
-            "Mag_STANAG_30Rnd", "Mag_STANAG_30Rnd", "Mag_STANAG_30Rnd",
+            "M4_MPBttstck",
+            "M4_RISHndgrd",
+            "ACOGOptic_6x",
+            "M4_Suppressor",
+            "Mag_STANAG_60Rnd", "Mag_STANAG_60Rnd",
             "PistolSuppressor",
             "RifleButtstockM4",
             "RailgunGrip",
@@ -126,16 +175,26 @@
     "loot_ORANGE": {
         "_comment": "Construction tools and rare vehicle parts",
         "items": [
-            "Hammer",
-            "Screwdriver",
-            "Pliers",
-            "Nails", "Nails", "Nails",
-            "BarbedWire", "BarbedWire",
-            "SparkPlug",
+            "CarRadiator",
+			"CoyoteBag_Green",
             "CarBattery",
+            "SparkPlug",
+            "TruckBattery",
             "GlowPlug",
-            "RadiatorBlock",
-            "EngineBelt"
+            "ElectronicRepairKit",
+            "TireRepairKit",
+            "Hammer",
+            "BarbedWire", "BarbedWire",
+			"Wire",
+            "Screwdriver",
+            "Nails", "Nails", "Nails", "Nails", "Nails", "Nails",
+            "EpoxyPutty", "EpoxyPutty", "EpoxyPutty",
+            "Pliers",
+            "PickAxe",
+            "WoodAxe",
+            "Hatchet",
+            "HandSaw",
+            "Shovel"
         ]
     },
 

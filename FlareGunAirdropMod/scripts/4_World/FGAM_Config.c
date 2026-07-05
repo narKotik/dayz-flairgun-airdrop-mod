@@ -11,6 +11,8 @@ class FGAM_FlareConfig
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;     // metres/second the crate falls
     float  airdropLifetime       = 1800.0;  // seconds before the crate despawns (30 min)
+    bool   airdropDespawnEnabled = true;    // false = crate stays forever and becomes pickable
+    float  airdropMaxAgeDays     = 45.0;    // only used when airdropDespawnEnabled is false; 0 = never expire
     string airdropContainerClass = "FGAM_AirdropContainer";
     float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;
@@ -86,6 +88,8 @@ class FGAM_Config
                 FlareSettings.airdropDescentSpeed = root.flare.airdropDescentSpeed;
             if (root.flare.airdropLifetime > 0)
                 FlareSettings.airdropLifetime    = root.flare.airdropLifetime;
+            FlareSettings.airdropDespawnEnabled  = root.flare.airdropDespawnEnabled;
+            FlareSettings.airdropMaxAgeDays      = root.flare.airdropMaxAgeDays;
             if (root.flare.airdropContainerClass != "")
                 FlareSettings.airdropContainerClass = root.flare.airdropContainerClass;
             FlareSettings.redZoneDelay           = root.flare.redZoneDelay;
@@ -240,6 +244,8 @@ class FGAM_JsonFlareSettings
     float  airdropSpawnHeight    = 100.0;
     float  airdropDescentSpeed   = 6.0;
     float  airdropLifetime       = 1800.0;
+    bool   airdropDespawnEnabled = true;
+    float  airdropMaxAgeDays     = 45.0;
     string airdropContainerClass = "FGAM_AirdropContainer";
     float  redZoneDelay          = 300.0;
     float  redZoneRadius         = 50.0;

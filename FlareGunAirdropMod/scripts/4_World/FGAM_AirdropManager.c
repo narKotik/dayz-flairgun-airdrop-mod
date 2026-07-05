@@ -110,6 +110,7 @@ Object FGAM_SpawnGasZone(vector groundPos, float lifetime)
 
     // ContaminatedArea_Local ticks this down once a second and deletes itself at 0.
     area.m_Lifetime = lifetime;
+    FGAM_SpawnRegistry.Track("FGAM_ToxicArea", groundPos, 20.0);
     Print("[FGAM] Toxic gas zone spawned at " + groundPos + " (lifetime " + lifetime + "s)");
     return obj;
 }
@@ -127,6 +128,7 @@ class FGAM_FallingAirdrop
     float  m_CurrentY;
     float  m_DescentSpeed;
     float  m_Lifetime;
+    string m_ContainerClass;
 
     static const int TICK_MS = 100;
 
@@ -136,6 +138,7 @@ class FGAM_FallingAirdrop
         m_DescentSpeed  = descentSpeed;
         if (m_DescentSpeed <= 0) m_DescentSpeed = 6.0;
         m_Lifetime     = lifetime;
+        m_ContainerClass = containerClass;
 
         m_CurrentY = groundPos[1] + spawnHeight;
         vector spawnPos = groundPos;
@@ -152,9 +155,29 @@ class FGAM_FallingAirdrop
             return;
         }
 
+        FGAM_FlareConfig fs = FGAM_Config.Get().FlareSettings;
+
         ItemBase crate = ItemBase.Cast(m_Crate);
         if (crate)
+        {
             FGAM_FillContainer(crate, items);
+            // Net-synced (RegisterNetSyncVariableBool) - set once here, server-side,
+            // and it replicates to clients correctly. See FGAM_AirdropContainer.c.
+            crate.SetTakeable(!fs.airdropDespawnEnabled);
+        }
+
+        // Tracked at the ground position (not the spawn/current height) with a
+        // search radius wide enough to cover the whole fall, so a restart mid-
+        // descent can still find and remove the crate later.
+        // maxAgeDays: a despawn-enabled crate can't be moved (SetTakeable(false)
+        // above), so if Sweep() ever finds it still sitting there, its normal
+        // lifetime remover must have been interrupted by a restart - delete on
+        // sight (-1). A despawn-disabled crate gets the configured grace period
+        // instead, so a freshly-landed one isn't mistaken for abandoned litter.
+        float maxAgeDays = -1;
+        if (!fs.airdropDespawnEnabled)
+            maxAgeDays = fs.airdropMaxAgeDays;
+        FGAM_SpawnRegistry.Track(containerClass, groundPos, spawnHeight + 20.0, maxAgeDays);
 
         s_Active.Insert(this);
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Descend, TICK_MS, true);
@@ -182,12 +205,25 @@ class FGAM_FallingAirdrop
 
             Stop();
 
-            FGAM_AirdropRemover rem = new FGAM_AirdropRemover();
-            rem.m_Crate = m_Crate;
-            rem.KeepAlive();
-            GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(rem.Remove, (int)(m_Lifetime * 1000), false);
+            if (FGAM_Config.Get().FlareSettings.airdropDespawnEnabled)
+            {
+                FGAM_AirdropRemover rem = new FGAM_AirdropRemover();
+                rem.m_Crate = m_Crate;
+                rem.m_ContainerClass = m_ContainerClass;
+                rem.m_GroundPos = m_GroundPos;
+                rem.KeepAlive();
+                GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(rem.Remove, (int)(m_Lifetime * 1000), false);
 
-            Print("[FGAM] airdrop landed at " + land + " - despawn in " + m_Lifetime + "s");
+                Print("[FGAM] airdrop landed at " + land + " - despawn in " + m_Lifetime + "s");
+            }
+            else
+            {
+                // Left in FGAM_SpawnRegistry with no remover scheduled: it survives
+                // restarts. FGAM_SpawnRegistry.CleanupOnBoot only removes it later if
+                // it's found untouched at this exact spot - if a player takes/moves
+                // it first, it's treated as claimed and left alone.
+                Print("[FGAM] airdrop landed at " + land + " - despawn disabled, crate is permanent and pickable");
+            }
             return;
         }
 
@@ -208,6 +244,8 @@ class FGAM_AirdropRemover
     private static ref array<ref FGAM_AirdropRemover> s_Active = new array<ref FGAM_AirdropRemover>();
 
     Object m_Crate;
+    string m_ContainerClass;
+    vector m_GroundPos;
 
     void KeepAlive()
     {
@@ -219,6 +257,7 @@ class FGAM_AirdropRemover
         s_Active.RemoveItem(this);
         if (m_Crate)
         {
+            FGAM_SpawnRegistry.Untrack(m_ContainerClass, m_GroundPos);
             GetGame().ObjectDelete(m_Crate);
             Print("[FGAM] airdrop crate recovered (despawned)");
         }

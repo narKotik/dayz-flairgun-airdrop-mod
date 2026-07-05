@@ -53,6 +53,7 @@ class FGAM_ToxicArea : ContaminatedArea_Local
         m_Lifetime -= TICK_RATE;
         if (m_Lifetime <= 0)
         {
+            FGAM_SpawnRegistry.Untrack("FGAM_ToxicArea", GetPosition());
             Delete();
             return;
         }

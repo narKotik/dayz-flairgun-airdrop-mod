@@ -2,6 +2,10 @@
 
 Fire a colored flare into the sky — trigger a unique airdrop or zone event.
 
+## Flare Gun Airdrop Mod (FGAM)
+
+How to install check INSTALL.md file
+
 ## Flares & colors
 
 Each FGAM flare fires a **colored burning flare** — slow rise/fall, bright, with a
@@ -78,13 +82,13 @@ regenerates the texture file itself. Full step-by-step: [ADDING_FLARES.md, Part
 
 | Color  | Event |
 |--------|-------|
-| 🔴 Red    | Toxic zone (ContaminatedArea_Dynamic) spawns after 5 min + military loot crate inside gas |
-| 🟡 Yellow | NBC/CBRN protection kit (suit, mask, filters, antidotes) |
-| 🟢 Green  | Survival kit (knife, axe, tent, basic meds) |
-| 🔵 Blue   | Medical humanitarian drop (blood bags, surgical kits, antibiotics) |
-| ⚪ White  | Provisions (food, water, purification tabs) |
-| ⚫ Black  | Top-tier weapons & ammo — no light at night, thick black smoke only |
-| 🟠 Orange | Construction tools, vehicle parts |
+| 🔴 Red    | Toxic zone (ContaminatedArea_Dynamic) spawns after 5 min + military weapon crate (AKM, plate carrier, tactical gear) inside the gas |
+| 🟡 Yellow | CBRN/NBC protection kit (suit, mask, filters, anti-chem injectors) |
+| 🟢 Green  | Survival kit (hunting knife/hatchet/bag, UMP45, MKII, basic clothing, bandages) |
+| 🔵 Blue   | Medical drop (saline, morphine, antibiotics, epinephrine, bandages, medical clothing) |
+| ⚪ White  | Provisions (canned/preserved food, drinks, water purification tabs) |
+| ⚫ Black  | Top-tier weapons & ammo (M4A1, Glock19) — no light at night, thick black smoke only |
+| 🟠 Orange | Construction tools & vehicle parts (car/truck batteries, spark/glow plugs, repair kits) |
 
 ## How it works
 
@@ -214,7 +218,7 @@ ignores unknown keys). Readable summary below — **JSON has no real comments, s
 ```jsonc
 {
   "flare": {
-    "minTriggerPitch": 30.0,        // degrees above horizontal needed to trigger (flat / indoors = nothing)
+    "minTriggerPitch": 75.0,        // degrees above horizontal needed to trigger (flat / indoors = nothing)
     "airdropSpawnHeight": 100.0,    // metres above the shooter the crate appears
     "airdropDescentSpeed": 6.0,     // metres/second it descends
     "airdropLifetime": 1800.0,      // seconds the landed crate stays (1800 = 30 min)
@@ -223,7 +227,7 @@ ignores unknown keys). Readable summary below — **JSON has no real comments, s
     "redZoneDuration": 1500.0       // Red flare: seconds the zone + its crate last
   },
   "loot_GREEN": {                   // one block per colour - exact DayZ class names
-    "items": [ "KnifeHunting", "Hatchet", "Bandage", "Bandage", "TentDome" ]
+    "items": [ "KnifeHunting", "Hatchet", "HipPack_Green", "BandageDressing", "BandageDressing" ]
   }
   // ...loot_RED / loot_BLUE / loot_WHITE / loot_YELLOW / loot_BLACK / loot_ORANGE
 }

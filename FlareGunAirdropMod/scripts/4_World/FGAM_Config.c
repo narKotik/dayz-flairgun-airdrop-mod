@@ -65,11 +65,6 @@ class FGAM_Config
             FGAM_JsonRoot root = new FGAM_JsonRoot();
             JsonFileLoader<FGAM_JsonRoot>.JsonLoadFile(path, root);
             ApplyJson(root);
-            Print("[FGAM] Config loaded from " + path);
-        }
-        else
-        {
-            Print("[FGAM] No config.json at " + path + " - using built-in defaults");
         }
     }
 

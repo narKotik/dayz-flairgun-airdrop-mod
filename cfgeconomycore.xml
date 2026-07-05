@@ -33,5 +33,6 @@
 	</defaults>
 	<ce folder="db">
 		<file name="FGAM_types.xml" type="types"/>
+		<file name="FGAM_spawnabletypes.xml" type="spawnabletypes"/>
 	</ce>
 </economycore>

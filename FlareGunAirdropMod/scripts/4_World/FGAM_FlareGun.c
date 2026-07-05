@@ -27,18 +27,49 @@ modded class Weapon_Base
 
         if (!GetGame().IsServer()) return;
 
+        // Wear the flare gun down one condition tier per shot so it is a limited-use
+        // item (~4 shots Pristine -> Ruined). Applies to ANY flare fired, not just
+        // ours. Health is saved by the engine automatically, so no custom store hooks
+        // are needed (those broke other weapons before - see git 07a8d73). Non-repair
+        // is enforced by repairableWithKits[]={} in config.cpp.
+        if (FGAM_IsFlaregun())
+            FGAM_DegradeCondition();
+
         string color = FGAM_ColorFromAmmo(ammoType);
         if (color == "") return; // not one of our flares - ignore vanilla/other mods
 
         if (!FGAM_FiredUpward())
-        {
-            Print("[FGAM] " + color + " flare not launched into the sky - no airdrop");
             return;
-        }
 
         vector dropPos = FGAM_DropPosition();
-        Print("[FGAM] " + color + " flare launched - airdrop at " + dropPos);
         FGAM_AirdropManager.Get().OnFlareEvent(color, dropPos, dropPos);
+    }
+
+    // True for the vanilla flare gun AND our tiered spawn variants (FGAM_Flaregun_*),
+    // so per-shot wear applies to all of them but not to other weapons/mods' guns.
+    protected bool FGAM_IsFlaregun()
+    {
+        string t = GetType();
+        return t == "Flaregun" || t.Contains("FGAM_Flaregun");
+    }
+
+    // Drop the gun one condition tier per call: Pristine -> Worn -> Damaged ->
+    // Badly Damaged -> Ruined. A Ruined weapon can't fire, so this hard-caps the
+    // number of shots. Uses real health (auto-persisted); no counter/store hooks.
+    protected void FGAM_DegradeCondition()
+    {
+        // GetHealthLevel() is available on Weapon_Base (via EntityAI); GetItemCondition()
+        // is NOT - it lives on ItemBase, a different branch. Level: 0=Pristine, 1=Worn,
+        // 2=Damaged, 3=Badly Damaged, 4=Ruined. Each shot lands health in the next tier.
+        float maxHP = GetMaxHealth("", "Health");
+        switch (GetHealthLevel())
+        {
+            case 0: SetHealth("", "Health", maxHP * 0.55); break; // Pristine     -> Worn
+            case 1: SetHealth("", "Health", maxHP * 0.35); break; // Worn         -> Damaged
+            case 2: SetHealth("", "Health", maxHP * 0.10); break; // Damaged      -> Badly Damaged
+            case 3: SetHealth("", "Health", 0.0);          break; // Badly Damaged -> Ruined
+            case 4: break;                                        // already Ruined
+        }
     }
 
     // Map our cartridge ammo class to a colour key. Only FGAM ammo matches, so
@@ -86,18 +117,11 @@ modded class Weapon_Base
         float udAngle  = hcw.GetBaseAimingAngleUD(); // degrees, positive = up
         float minPitch = FGAM_Config.Get().FlareSettings.minTriggerPitch;
         if (udAngle < minPitch)
-        {
-            Print("[FGAM] aim pitch " + udAngle + " deg < " + minPitch + " - too low, suppressed");
             return false;
-        }
 
         if (MiscGameplayFunctions.IsUnderRoofEx(player, GameConstants.ROOF_CHECK_RAYCAST_DIST, ObjIntersectFire))
-        {
-            Print("[FGAM] under a roof - flare blocked overhead, suppressed");
             return false;
-        }
 
-        Print("[FGAM] valid sky shot: aim pitch=" + udAngle + " deg, overhead clear");
         return true;
     }
 }

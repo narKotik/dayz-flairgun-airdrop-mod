@@ -124,19 +124,11 @@ class FGAM_SpawnRegistry
     static void Sweep()
     {
         if (!FileExist(PATH))
-        {
-            Print("[FGAM] Sweep: no registry file at " + PATH + " - nothing to do");
             return;
-        }
 
         FGAM_SpawnRegistryData data = Load();
         ref array<ref FGAM_SpawnRecord> kept = new array<ref FGAM_SpawnRecord>();
-        int removed = 0;
-        int notFound = 0;
-        int moved = 0;
         int today = CurrentDaySerial();
-
-        Print("[FGAM] Sweep: checking " + data.entries.Count() + " tracked entry(ies)");
 
         foreach (FGAM_SpawnRecord rec : data.entries)
         {
@@ -156,11 +148,7 @@ class FGAM_SpawnRegistry
             }
 
             if (!found)
-            {
-                notFound++;
-                Print("[FGAM] Sweep: " + rec.cls + " at " + pos + " (radius " + rec.searchRadius + ") not found - dropping tracking (gone, or moved beyond radius)");
                 continue; // gone, or moved beyond searchRadius - either way, drop tracking
-            }
 
             vector opos = found.GetPosition();
             float dx = opos[0] - rec.x;
@@ -168,26 +156,18 @@ class FGAM_SpawnRegistry
             bool stationary = (dx * dx + dz * dz) <= STATIONARY_TOLERANCE * STATIONARY_TOLERANCE;
 
             if (!stationary)
-            {
-                moved++;
-                Print("[FGAM] Sweep: " + rec.cls + " moved from " + pos + " to " + opos + " - treating as claimed, dropping tracking");
                 continue; // moved - claimed forever, drop tracking and never touch it again
-            }
 
             bool agedOut = rec.maxAgeDays < 0 || (rec.maxAgeDays > 0 && (today - rec.spawnDaySerial) >= rec.maxAgeDays);
             if (agedOut)
             {
                 GetGame().ObjectDelete(found);
-                removed++;
-                Print("[FGAM] Sweep: removed " + rec.cls + " at " + pos + " (stationary, aged out)");
             }
             else
             {
                 kept.Insert(rec); // still untouched, still within its grace period - keep watching
             }
         }
-
-        Print("[FGAM] Sweep: done - removed " + removed + ", moved/claimed " + moved + ", not found " + notFound + ", still watching " + kept.Count());
 
         FGAM_SpawnRegistryData newData = new FGAM_SpawnRegistryData();
         newData.entries = kept;
@@ -221,7 +201,6 @@ class FGAM_SpawnRegistryMaintenance
 
     void BootTick()
     {
-        Print("[FGAM] Running delayed startup sweep");
         FGAM_SpawnRegistry.Sweep();
     }
 

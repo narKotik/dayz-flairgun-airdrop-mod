@@ -24,6 +24,7 @@ copy /y "%BUILD%\mod.cpp"  "%CLIENT%\@FlareGunAirdropMod\mod.cpp"
 echo.
 echo === 3. Copy mission files (cfgeconomycore, FGAM_types, ServerProfile config) ===
 copy /y "%PROJECT%\db\FGAM_types.xml" "%MISSION%\db\FGAM_types.xml"
+copy /y "%PROJECT%\db\FGAM_spawnabletypes.xml" "%MISSION%\db\FGAM_spawnabletypes.xml"
 copy /y "%PROJECT%\cfgeconomycore.xml" "%MISSION%\cfgeconomycore.xml" 2>nul
 
 :: Server JSON config (goes to Profiles folder, created at runtime if missing)

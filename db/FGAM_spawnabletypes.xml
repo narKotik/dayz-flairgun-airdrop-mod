@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    FGAM spawnabletypes - sets the SPAWN CONDITION of each tiered flare gun.
+    <damage> is 0.0 = Pristine ... 1.0 = Ruined. Health = 1 - damage. The ranges
+    below are chosen to land inside a single condition tier so, combined with the
+    per-shot wear (one tier lost per shot), spawn condition = shots before ruined:
+
+      Coast : damage 0.78-0.92 -> health 0.08-0.22 -> Badly Damaged -> 1 use
+      Mid   : damage 0.32-0.46 -> health 0.54-0.68 -> Worn          -> 3 uses
+      Mil   : damage 0.00-0.08 -> health 0.92-1.00 -> Pristine      -> 4 uses
+
+    Registered via cfgeconomycore.xml <file ... type="spawnabletypes"/>.
+    Deployed to the mission db/ by 2_deploy.bat.
+-->
+<spawnabletypes>
+    <type name="FGAM_Flaregun_Coast">
+        <damage min="0.78" max="0.92"/>
+    </type>
+    <type name="FGAM_Flaregun_Mid">
+        <damage min="0.32" max="0.46"/>
+    </type>
+    <type name="FGAM_Flaregun_Mil">
+        <damage min="0.0" max="0.08"/>
+    </type>
+</spawnabletypes>

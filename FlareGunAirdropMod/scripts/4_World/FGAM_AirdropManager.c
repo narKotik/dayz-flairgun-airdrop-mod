@@ -25,8 +25,6 @@ class FGAM_AirdropManager
         vector groundPos = peakPos;
         groundPos[1] = GetGame().SurfaceY(peakPos[0], peakPos[2]);
 
-        Print("[FGAM] Flare event: " + color + " at " + groundPos);
-
         switch (color)
         {
             case "RED":
@@ -41,9 +39,6 @@ class FGAM_AirdropManager
             case "ORANGE":
                 SpawnAirdrop(groundPos, color, cfg, cfg.FlareSettings.airdropLifetime);
                 break;
-
-            default:
-                Print("[FGAM] Unknown flare color: " + color);
         }
     }
 
@@ -71,7 +66,6 @@ class FGAM_AirdropManager
         timer.m_Duration = cfg.FlareSettings.redZoneDuration;
         timer.KeepAlive();
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(timer.Activate, (int)(cfg.FlareSettings.redZoneDelay * 1000), false);
-        Print("[FGAM] Toxic zone + loot scheduled in " + cfg.FlareSettings.redZoneDelay + "s at " + groundPos);
     }
 }
 
@@ -103,15 +97,11 @@ Object FGAM_SpawnGasZone(vector groundPos, float lifetime)
     Object obj = GetGame().CreateObjectEx("FGAM_ToxicArea", groundPos, ECE_PLACE_ON_SURFACE);
     FGAM_ToxicArea area = FGAM_ToxicArea.Cast(obj);
     if (!area)
-    {
-        Print("[FGAM] Failed to create FGAM_ToxicArea");
         return obj;
-    }
 
     // ContaminatedArea_Local ticks this down once a second and deletes itself at 0.
     area.m_Lifetime = lifetime;
     FGAM_SpawnRegistry.Track("FGAM_ToxicArea", groundPos, 20.0);
-    Print("[FGAM] Toxic gas zone spawned at " + groundPos + " (lifetime " + lifetime + "s)");
     return obj;
 }
 
@@ -150,10 +140,7 @@ class FGAM_FallingAirdrop
         //               flag so it does not free-fall and we can animate it down.
         m_Crate = GetGame().CreateObjectEx(containerClass, spawnPos, ECE_SETUP | ECE_KEEPHEIGHT);
         if (!m_Crate)
-        {
-            Print("[FGAM] Failed to create airdrop container '" + containerClass + "'");
             return;
-        }
 
         FGAM_FlareConfig fs = FGAM_Config.Get().FlareSettings;
 
@@ -181,7 +168,6 @@ class FGAM_FallingAirdrop
 
         s_Active.Insert(this);
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Descend, TICK_MS, true);
-        Print("[FGAM] " + color + " airdrop spawned at " + spawnPos + " - descending");
     }
 
     void Descend()
@@ -213,17 +199,11 @@ class FGAM_FallingAirdrop
                 rem.m_GroundPos = m_GroundPos;
                 rem.KeepAlive();
                 GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(rem.Remove, (int)(m_Lifetime * 1000), false);
-
-                Print("[FGAM] airdrop landed at " + land + " - despawn in " + m_Lifetime + "s");
             }
-            else
-            {
-                // Left in FGAM_SpawnRegistry with no remover scheduled: it survives
-                // restarts. FGAM_SpawnRegistry.CleanupOnBoot only removes it later if
-                // it's found untouched at this exact spot - if a player takes/moves
-                // it first, it's treated as claimed and left alone.
-                Print("[FGAM] airdrop landed at " + land + " - despawn disabled, crate is permanent and pickable");
-            }
+            // else: left in FGAM_SpawnRegistry with no remover scheduled: it survives
+            // restarts. FGAM_SpawnRegistry.CleanupOnBoot only removes it later if
+            // it's found untouched at this exact spot - if a player takes/moves
+            // it first, it's treated as claimed and left alone.
             return;
         }
 
@@ -259,7 +239,6 @@ class FGAM_AirdropRemover
         {
             FGAM_SpawnRegistry.Untrack(m_ContainerClass, m_GroundPos);
             GetGame().ObjectDelete(m_Crate);
-            Print("[FGAM] airdrop crate recovered (despawned)");
         }
     }
 }
@@ -290,7 +269,5 @@ class FGAM_ToxicZoneTimer
         // Drop the military crate into the gas; its lifetime matches the zone.
         FGAM_Config cfg = FGAM_Config.Get();
         FGAM_AirdropManager.Get().SpawnAirdrop(m_Position, "RED", cfg, m_Duration);
-
-        Print("[FGAM] Toxic zone activated at " + m_Position + " - lasts " + m_Duration + "s");
     }
 }

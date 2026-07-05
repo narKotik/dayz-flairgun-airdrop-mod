@@ -1,8 +1,8 @@
 // FGAM_Magazines - script-class bindings for the flare magazines.
 // Path: FlareGunAirdropMod/scripts/4_World/FGAM_Magazines.c
 //
-// These bind each FGAM flare magazine to an Ammunition_Base script class - exactly
-// This is the pattern that lets custom flare ammo chamber without crashing. They are
+// These bind each FGAM flare magazine to an Ammunition_Base script class - the
+// pattern that lets custom flare ammo chamber without crashing. They are
 // intentionally empty; colour handling + the airdrop trigger live in the flare's
 // simulation (FGAM_FlareVisuals.c), not on the weapon or the magazine.
 

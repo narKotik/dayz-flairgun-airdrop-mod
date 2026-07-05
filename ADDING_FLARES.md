@@ -1,10 +1,12 @@
 # Adding a new flare colour (and its loot & spawn locations)
 
-This guide covers three things:
+This guide covers four things:
 
 1. **Add a new colour of flare** — the in-air coloured flare + its trigger.
 2. **Attach loot to the crate it spawns.**
 3. **Decide where the flare itself spawns in the world.**
+4. **Give it a ground-loot ammo box** — the actual pickup players find (the loose
+   cartridge can't be placed on the ground by CE — see Part 4).
 
 Throughout, the worked example adds a **Purple** flare. Replace `Purple` / `PURPLE` /
 `purple` with your colour, keeping the capitalisation in each spot.
@@ -172,6 +174,13 @@ Flares (and the flare gun) spawn through DayZ's **central economy** (`types.xml`
 through the mod's code. Add an entry in `db/FGAM_types.xml` (this is merged into the
 mission as a separate CE file by `cfgeconomycore.xml`).
 
+> **The magazine itself does NOT ground-spawn.** `Flare_SingleRound.p3d` (the vanilla
+> cartridge model every `FGAM_Mag_<Colour>` uses) is a thin rod CE can't reliably place
+> on a surface, so in this mod every `FGAM_Mag_<Colour>` type ships at
+> `nominal="0"`/`count_in_map="0"` — unpack-only, never a direct pickup (see the real
+> entries in `db/FGAM_types.xml`, not the illustrative one below). The thing a player
+> actually finds while looting the ground is the **ammo box** — see **Part 4**.
+
 ```xml
 <type name="FGAM_Mag_Purple">
     <nominal>4</nominal>      <!-- target number on the map at once -->
@@ -208,6 +217,73 @@ rarer than `FGAM_Mag_Green`).
 
 ---
 
+## Part 4 — Add the ground-loot ammo box
+
+Players don't find the loose cartridge on the ground (Part 3's note above explains
+why) — they find a **box** (`FGAM_Box_<Colour>`) that unpacks (right-click "Unbox")
+into one `FGAM_Mag_<Colour>`. It's built on the vanilla `00Buck_10RoundBox.p3d` model
+(proven ground-spawnable), the same trick real ammo boxes use — see
+`FGAM_Box_FlareBase` in `config.cpp` for the full mechanism.
+
+### 4.1 Generate the label texture
+Textures live in `FlareGunAirdropMod/data/`. Use the generator — it draws a clean
+"SIGNAL FLARE" label from scratch (no reused vanilla shotgun-shell art) and converts it
+straight to `.paa`:
+```
+make_box.bat purple 155 30 220
+```
+- `name` — lowercase, must match the `_co.paa` filename the box class below expects
+- `R G B` — **0–255** (not 0–1 like `make_flare.bat`)
+
+Writes `FlareGunAirdropMod\data\fgam_box_purple_co.paa`. Needs **Python + Pillow**
+(`pip install pillow`) and **DayZ Tools** installed (for `ImageToPAA.exe` — the script
+auto-detects common install paths, or set `FGAM_IMAGETOPAA` to its full path). Pass
+`--png-only` to `make_box.py` directly to preview the PNG before converting.
+
+### 4.2 Add the box class — `config.cpp`, `class CfgVehicles`
+Copy an existing `FGAM_Box_<Colour>` (e.g. `FGAM_Box_Orange`) right after it:
+```cpp
+class FGAM_Box_Purple : FGAM_Box_FlareBase
+{
+    scope = 2;
+    displayName = "Ammo Box (Signal Flares - Purple)";
+    descriptionShort = "Unpack for a purple signal flare.";
+    hiddenSelectionsTextures[] = { "FlareGunAirdropMod\data\fgam_box_purple_co.paa" };
+    class Resources { class FGAM_Mag_Purple { value = 1; variable = "quantity"; }; };
+};
+```
+`value` is how many rounds unpacking gives you (currently `1` for every colour).
+
+Also add `"FGAM_Box_Purple"` to `CfgPatches > FlareGunAirdropMod > units[]` near the
+top of `config.cpp`, alongside the other `FGAM_Box_*` entries — classes missing from
+`units[]` can still be referenced, but won't show up correctly in some mod-listing/
+Workshop tooling.
+
+### 4.3 Where the box spawns — `db/FGAM_types.xml`
+This is the entry CE actually uses (unlike the illustrative `FGAM_Mag_Purple` one in
+Part 3). Copy an existing `FGAM_Box_<Colour>` block:
+```xml
+<type name="FGAM_Box_Purple">
+    <nominal>5</nominal>
+    <lifetime>7200</lifetime>
+    <restock>900</restock>
+    <min>2</min>
+    <quantmin>-1</quantmin>
+    <quantmax>-1</quantmax>
+    <cost>100</cost>
+    <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+    <category name="weapons"/>
+    <usage name="Coast"/>
+    <usage name="Village"/>
+    <usage name="Town"/>
+</type>
+```
+Stack multiple `usage` tags (they're OR'd) to avoid CE "exceeded max tests" starvation
+on a single narrow tag — see the README's *Color → Event* section for which usage
+combo each existing colour uses (common vs. rare/military-grade tiers).
+
+---
+
 ## Build & test
 
 1. `1_copy_to_P.bat` — syncs source, binarises config, packs + signs the PBO (CLI, no
@@ -222,7 +298,10 @@ Test checklist for the new colour:
 - ~A crate descends nearby with your `loot_PURPLE` items.
 - Server log (`<server>/Profiles/DayZServer_x64_*.RPT`) shows
   `[FGAM] PURPLE flare launched - airdrop at ...`.
-- Over time, the flare appears as loot in the `usage`/`value` locations you set.
+- `FGAM_Box_Purple` unpacks (right-click "Unbox") into one loaded `FGAM_Mag_Purple`.
+- Over time, the box appears as ground loot in the `usage` locations you set in Part 4
+  (CE fills sparse `nominal` counts gradually, not instantly on server start — give it
+  real playtime near matching points before assuming it's broken).
 
 If the flare fires but shows **light only, no flame/smoke**, the `.ptc` didn't load —
 re-check the path/name in steps 1.1–1.2 (`FlareGunAirdropMod/Graphics/Particles/<name>.ptc`).

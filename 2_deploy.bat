@@ -7,9 +7,19 @@ set SERVER=D:\Installs\steam\steamapps\common\DayZServer
 set CLIENT=D:\Installs\steam\steamapps\common\DayZ
 set MISSION=%SERVER%\mpmissions\dayzOffline.chernarusplus
 
-echo === 1. Copy PBO + keys from build folder to server ===
+:: If @FlareGunAirdropMod currently points at the Steam Workshop copy (see
+:: 3_switch_to_workshop.bat), it's a junction. robocopy /purge would traverse
+:: it and delete/overwrite files inside the actual Workshop item folder, so
+:: remove the junction first (removes only the link, not its target) before
+:: writing a real local copy.
+call :unlink_if_junction "%SERVER%\@FlareGunAirdropMod"
+call :unlink_if_junction "%CLIENT%\@FlareGunAirdropMod"
+
+echo === 1. Copy PBO + public key from build folder to server ===
 robocopy "%BUILD%\addons" "%SERVER%\@FlareGunAirdropMod\addons" /e /purge /njh /njs
-robocopy "%BUILD%\keys"   "%SERVER%\@FlareGunAirdropMod\keys"   /e /purge /njh /njs
+if not exist "%SERVER%\@FlareGunAirdropMod\keys" mkdir "%SERVER%\@FlareGunAirdropMod\keys"
+:: Only the public .bikey ships with the mod folder — never the .biprivatekey.
+copy /y "%BUILD%\keys\*.bikey" "%SERVER%\@FlareGunAirdropMod\keys\"
 copy /y "%BUILD%\mod.cpp"  "%SERVER%\@FlareGunAirdropMod\mod.cpp"
 
 :: Copy bikey to server keys folder
@@ -18,7 +28,8 @@ copy /y "%BUILD%\keys\*.bikey" "%SERVER%\keys\"
 echo.
 echo === 2. Copy mod to DayZ client ===
 robocopy "%BUILD%\addons" "%CLIENT%\@FlareGunAirdropMod\addons" /e /purge /njh /njs
-robocopy "%BUILD%\keys"   "%CLIENT%\@FlareGunAirdropMod\keys"   /e /purge /njh /njs
+if not exist "%CLIENT%\@FlareGunAirdropMod\keys" mkdir "%CLIENT%\@FlareGunAirdropMod\keys"
+copy /y "%BUILD%\keys\*.bikey" "%CLIENT%\@FlareGunAirdropMod\keys\"
 copy /y "%BUILD%\mod.cpp"  "%CLIENT%\@FlareGunAirdropMod\mod.cpp"
 
 echo.
@@ -35,3 +46,12 @@ echo.
 echo === Done! Restart the server to apply changes. ===
 echo.
 pause
+goto :eof
+
+:unlink_if_junction
+fsutil reparsepoint query "%~1" >nul 2>&1
+if not errorlevel 1 (
+    echo Removing Workshop-mode junction: %~1
+    rmdir "%~1"
+)
+exit /b

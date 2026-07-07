@@ -3,6 +3,9 @@ addons/*.pbo
 addons/*.bisign
 keys/*.biprivatekey
 
+# ── Signing key (belt-and-suspenders: catch it anywhere in the tree) ──────────
+*.biprivatekey
+
 # ── Server deploy artifacts (live server files, not source) ───────────────────
 # These are deployed by 2_deploy.bat — don't track the deployed copies
 /deploy/
@@ -27,6 +30,10 @@ CLAUDE.md
 # ── Local-only planning docs (kept locally, never committed) ──────────────────
 PUBLISHING.md
 SEPARATION_PLAN.md
+
+# ── One-off local tooling (not part of the mod's build pipeline) ──────────────
+make_icon.py
+make_icon.bat
 
 # ── OS junk ───────────────────────────────────────────────────────────────────
 Thumbs.db

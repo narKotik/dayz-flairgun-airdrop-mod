@@ -9,3 +9,4 @@ overview = "Fire colored flares into the sky to trigger unique airdrops and zone
 action = "";
 author = "FanaticalWarlock";
 credits = "Coloured flares, airdrops and toxic zones - all original work on vanilla DayZ assets. Licensed under LICENSE.md (free to use and modify, with credit).";
+version = "1.0";

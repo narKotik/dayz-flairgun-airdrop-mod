@@ -152,6 +152,8 @@ class FGAM_Config
         red.Insert("TacticalGoggles");
         red.Insert("MilitaryBelt");
         red.Insert("NylonKnifeSheath");
+        red.Insert("PlateCarrierPouches_Camo");
+        red.Insert("PlateCarrierHolster_Camo");
         red.Insert("PlateCarrierHolster_Camo");
         red.Insert("Attack2Bag_Ttsko");
         red.Insert("TacticalGloves_Black");

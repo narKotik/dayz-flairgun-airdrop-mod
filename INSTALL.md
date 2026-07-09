@@ -30,7 +30,7 @@ This step is **not automatic** — it's true for any mod that adds loot/spawns, 
 specific to FGAM. You're editing your **mission** folder (e.g.
 `mpmissions/dayzOffline.chernarusplus`), not the mod itself.
 
-1. Copy `db/FGAM_types.xml` from this mod into your mission's `db/` folder.
+1. Copy `db/FGAM_types.xml`, `db/FGAM_spawnabletypes.xml` from this mod into your mission's `db/` folder.
 2. In your mission's `cfgeconomycore.xml`, add inside `<economycore>`:
    ```xml
 	<ce folder="db">
@@ -39,7 +39,7 @@ specific to FGAM. You're editing your **mission** folder (e.g.
 	</ce>
    ```
    Get the filename exactly right — a typo fails silently (CE logs
-   `Failed to read types file 'db/FGAM_types.xml'` and the type is never registered).
+   `Failed to read types files 'db/FGAM_types.xml', 'db/FGAM_spawnabletypes.xml'` and the type is never registered).
 3. **Make the flare gun spawn**: edit the existing `Flaregun` entry in your mission's
    main `db/types.xml` (it's a vanilla item, usually `nominal="0"` = never spawns) —
    e.g. set `<nominal>12</nominal>`, `<min>3</min>`.

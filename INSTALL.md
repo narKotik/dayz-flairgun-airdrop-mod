@@ -33,9 +33,10 @@ specific to FGAM. You're editing your **mission** folder (e.g.
 1. Copy `db/FGAM_types.xml` from this mod into your mission's `db/` folder.
 2. In your mission's `cfgeconomycore.xml`, add inside `<economycore>`:
    ```xml
-   <ce folder="db">
-       <file name="FGAM_types.xml" type="types"/>
-   </ce>
+	<ce folder="db">
+		<file name="FGAM_types.xml" type="types"/>
+		<file name="FGAM_spawnabletypes.xml" type="spawnabletypes"/>
+	</ce>
    ```
    Get the filename exactly right — a typo fails silently (CE logs
    `Failed to read types file 'db/FGAM_types.xml'` and the type is never registered).

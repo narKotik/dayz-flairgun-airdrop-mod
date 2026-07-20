@@ -9,7 +9,7 @@ set BUILD=D:\Projects\DayZMods\@FlareGunAirdropMod
 set TOOLS=D:\Installs\steam\steamapps\common\DayZ Tools\Bin
 set KEY=%BUILD%\keys\FGAM_v1.biprivatekey
 
-echo === 1/4 Syncing source to %P_MOD% ===
+echo === 1/5 Syncing source to %P_MOD% ===
 if not exist "%P_MOD%" mkdir "%P_MOD%"
 copy /y "%PROJECT%\config.cpp" "%P_MOD%\config.cpp" >nul
 copy /y "%PROJECT%\mod.cpp"    "%P_MOD%\mod.cpp"    >nul
@@ -18,14 +18,19 @@ robocopy "%PROJECT%\FlareGunAirdropMod\scripts"   "%P_MOD%\scripts"   /e /purge 
 robocopy "%PROJECT%\FlareGunAirdropMod\data"      "%P_MOD%\data"      /e /purge /njh /njs /ndl /nc /ns >nul
 robocopy "%PROJECT%\FlareGunAirdropMod\Graphics"  "%P_MOD%\Graphics"  /e /purge /njh /njs /ndl /nc /ns >nul
 
-echo === 2/4 Binarizing config.cpp -^> config.bin ===
+echo === 2/5 Binarizing config.cpp -^> config.bin ===
 "%TOOLS%\CfgConvert\CfgConvert.exe" -bin -dst "%P_MOD%\config.bin" "%P_MOD%\config.cpp"
 
-echo === 3/4 Packing + signing PBO (CLI, no GUI) ===
+echo === 3/5 Packing + signing PBO (CLI, no GUI) ===
 :: -packonly keeps the .c scripts as source (binarize would strip them); -sign signs it.
 "%TOOLS%\AddonBuilder\AddonBuilder.exe" "%P_MOD%" "%BUILD%\addons" -packonly -prefix=FlareGunAirdropMod -sign="%KEY%" -temp="P:\_fgam_packtmp" -clear
 
-echo === 4/4 Done ===
+echo === 4/5 Syncing Configs -^> %BUILD%\Configs ===
+:: Configs/ ships loose alongside the PBO (not packed into it) so server owners
+:: get the mission CE files + setup instructions inside the downloaded mod itself.
+robocopy "%PROJECT%\Configs" "%BUILD%\Configs" /e /purge /njh /njs /ndl /nc /ns >nul
+
+echo === 5/5 Done ===
 if exist "%BUILD%\addons\FlareGunAirdropMod.pbo" (
     echo Built: "%BUILD%\addons\FlareGunAirdropMod.pbo"
     echo Now run 2_deploy.bat to push it to the server + client, then restart the server.

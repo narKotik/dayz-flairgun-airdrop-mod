@@ -130,7 +130,7 @@ case "ORANGE":
 (If you want it to do something custom instead — like Red's toxic zone — add its own
 `case` with your own handler.)
 
-### 2.2 Loot list (editable at runtime) — `ServerProfile/FlareGunAirdropMod/config.json`
+### 2.2 Loot list (editable at runtime) — `Configs/FlareGunAirdropMod/config.json`
 Add a `loot_PURPLE` block. Items are exact DayZ class names; anything that doesn't fit
 the crate drops on the ground beside it.
 ```json

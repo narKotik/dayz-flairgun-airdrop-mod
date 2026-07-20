@@ -30,7 +30,12 @@ This step is **not automatic** — it's true for any mod that adds loot/spawns, 
 specific to FGAM. You're editing your **mission** folder (e.g.
 `mpmissions/dayzOffline.chernarusplus`), not the mod itself.
 
-1. Copy `db/FGAM_types.xml`, `db/FGAM_spawnabletypes.xml` from this mod into your mission's `db/` folder.
+Everything you need for this step ships inside the mod under
+`@FlareGunAirdropMod/Configs/` — see `Configs/How to setup.txt` for the short version.
+
+1. Copy `Configs/chernarusplus/db/FGAM_types.xml` and
+   `Configs/chernarusplus/db/FGAM_spawnabletypes.xml` from the mod into your mission's
+   `db/` folder.
 2. In your mission's `cfgeconomycore.xml`, add inside `<economycore>`:
    ```xml
 	<ce folder="db">
@@ -40,6 +45,9 @@ specific to FGAM. You're editing your **mission** folder (e.g.
    ```
    Get the filename exactly right — a typo fails silently (CE logs
    `Failed to read types files 'db/FGAM_types.xml', 'db/FGAM_spawnabletypes.xml'` and the type is never registered).
+   If you don't already have a customized `cfgeconomycore.xml`, you can instead just
+   copy the mod's `Configs/chernarusplus/cfgeconomycore.xml` over your mission's file
+   wholesale — it already has the `<ce>` entry above.
 3. **Make the flare gun spawn**: edit the existing `Flaregun` entry in your mission's
    main `db/types.xml` (it's a vanilla item, usually `nominal="0"` = never spawns) —
    e.g. set `<nominal>12</nominal>`, `<min>3</min>`.
@@ -52,7 +60,7 @@ specific to FGAM. You're editing your **mission** folder (e.g.
 
 ## 3. Configure loot & timers (optional, no rebuild needed)
 
-Copy `ServerProfile/FlareGunAirdropMod/config.json` from this mod to:
+Copy `Configs/FlareGunAirdropMod/config.json` from this mod to:
 ```
 <ServerProfileFolder>/FlareGunAirdropMod/config.json
 ```

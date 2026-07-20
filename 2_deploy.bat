@@ -33,14 +33,14 @@ copy /y "%BUILD%\keys\*.bikey" "%CLIENT%\@FlareGunAirdropMod\keys\"
 copy /y "%BUILD%\mod.cpp"  "%CLIENT%\@FlareGunAirdropMod\mod.cpp"
 
 echo.
-echo === 3. Copy mission files (cfgeconomycore, FGAM_types, ServerProfile config) ===
-copy /y "%PROJECT%\db\FGAM_types.xml" "%MISSION%\db\FGAM_types.xml"
-copy /y "%PROJECT%\db\FGAM_spawnabletypes.xml" "%MISSION%\db\FGAM_spawnabletypes.xml"
-copy /y "%PROJECT%\cfgeconomycore.xml" "%MISSION%\cfgeconomycore.xml" 2>nul
+echo === 3. Copy mission files (cfgeconomycore, FGAM_types, server config) ===
+copy /y "%PROJECT%\Configs\chernarusplus\db\FGAM_types.xml" "%MISSION%\db\FGAM_types.xml"
+copy /y "%PROJECT%\Configs\chernarusplus\db\FGAM_spawnabletypes.xml" "%MISSION%\db\FGAM_spawnabletypes.xml"
+copy /y "%PROJECT%\Configs\chernarusplus\cfgeconomycore.xml" "%MISSION%\cfgeconomycore.xml" 2>nul
 
 :: Server JSON config (goes to Profiles folder, created at runtime if missing)
 if not exist "%SERVER%\Profiles\FlareGunAirdropMod" mkdir "%SERVER%\Profiles\FlareGunAirdropMod"
-copy /y "%PROJECT%\ServerProfile\FlareGunAirdropMod\config.json" "%SERVER%\Profiles\FlareGunAirdropMod\config.json"
+copy /y "%PROJECT%\Configs\FlareGunAirdropMod\config.json" "%SERVER%\Profiles\FlareGunAirdropMod\config.json"
 
 echo.
 echo === Done! Restart the server to apply changes. ===

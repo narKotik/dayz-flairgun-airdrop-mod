@@ -210,7 +210,7 @@ keeps the vanilla `types.xml` untouched). Add inside `<economycore>`:
 
 ### 3. Tune behaviour & loot — server profile `config.json`
 The main runtime config. **Editing loot or timers here needs only a server restart — no
-rebuild.** Copy `ServerProfile/FlareGunAirdropMod/config.json` to:
+rebuild.** Copy `Configs/FlareGunAirdropMod/config.json` to:
 ```
 <ServerProfileFolder>/FlareGunAirdropMod/config.json
 ```

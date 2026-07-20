@@ -1,0 +1,16 @@
+Step 1 - Copy files from chernarusplus directory to you server mission directory dayzOffline.chernarusplus 
+or dayzOffline-local.chernarusplus (if copied you mission to another directory because you don't want to setup 
+it again after server update), like so
+C:\dayz-server\mpmissions\dayzOffline-local.chernarusplus
+replace cfgeconomycore.xml or just add this in the end
+<ce folder="db">
+	<file name="FGAM_types.xml" type="types"/>
+	<file name="FGAM_spawnabletypes.xml" type="spawnabletypes"/>
+</ce>
+
+Step 2 (optional if you want to use configurations or setup what loot each aidrop will have)
+Copy directory FlareGunAirdropMod to profiles like this
+C:\dayz-server\profiles\FlareGunAirdropMod\config.json
+
+Step 3 (optional if you want to change spawn rates for flaregun and flare ammo boxes) use FGAM_types.xml file that you copies earlier
+C:\dayz-server\mpmissions\dayzOffline-local.chernarusplus\db\FGAM_types.xml
